@@ -38,14 +38,14 @@ module.exports = {
       ]
     },
     testnet: {
-      url: "https://data-seed-prebsc-1-s1.binance.org:8545",
+      url: "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
       accounts: [process.env.BLOCKCHAIN_TESTNET_PRIVATE_KEY],
       contracts: [
         process.env.BLOCKCHAIN_TESTNET_CONTRACT_ADDRESS
       ]
     },
     mainnet: {
-      url: "https://bsc-dataseed.binance.org/",
+      url: "https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
       accounts: [process.env.BLOCKCHAIN_MAINNET_PRIVATE_KEY],
       contracts: [
         process.env.BLOCKCHAIN_MAINNET_CONTRACT_ADDRESS
