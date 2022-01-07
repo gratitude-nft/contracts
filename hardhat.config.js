@@ -33,9 +33,6 @@ module.exports = {
     localhost: {
       url: "http://127.0.0.1:8545",
       accounts: [process.env.BLOCKCHAIN_LOCALHOST_PRIVATE_KEY],
-      wallets: {
-        fund: process.env.BLOCKCHAIN_LOCALHOST_FUND_ADDRESS
-      },
       contracts: [
         process.env.BLOCKCHAIN_LOCALHOST_CONTRACT_ADDRESS
       ]
@@ -66,7 +63,7 @@ module.exports = {
   },
   paths: {
     sources: "./contracts",
-    tests: "./test",
+    tests: "./tests",
     cache: "./cache",
     artifacts: "./artifacts"
   },
@@ -75,9 +72,8 @@ module.exports = {
   },
   gasReporter: {
     currency: 'USD',
-    token: 'BNB', //comment this out if you want ETH
     coinmarketcap: process.env.BLOCKCHAIN_CMC_KEY,
-    gasPrice: 200,
+    gasPrice: 200
   },
   etherscan: {
     // Your API key for Etherscan

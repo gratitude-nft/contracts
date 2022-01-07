@@ -21,12 +21,11 @@ sale and minting.
     and the provenance hash will be a sequence of these.
  4. Before the NFT sale, the art as well as the provenance hash will be 
     posted.
- 5. Before the NFT sale, the team will call `reserve` to allocate a few 
-    NFTs for themselves. 
+ 5. When the contract is deployed, the code will reserve the first 16 NFTs for the team. 
  6. The sale will begin as described on the `START_DATE` specified in 
-    `GratitudeCollection.sol`. This merely assigns token IDs to owners.
- 7. No art will be revealed *(assigned to a token ID)* until the end 
-    the sale period, in which the starting image assigned will depend 
+    `GratitudeCollection.sol`. Minting merely assigns token IDs to owners.
+ 7. No art will be revealed *(assigned to a token ID)* until `withdraw` 
+    is called, in which the starting image assigned will depend 
     on the last block number recorded.
 
 ## 2. Auditing
@@ -48,3 +47,28 @@ Make sure in `.env` to set the `BLOCKCHAIN_NETWORK` to `hardhat`.
 ```bash
 $ npm test
 ```
+
+### Reports
+
+The following is an example gas report from the tests ran in this 
+project and could change based on the cost of `ETH` itself.
+
+<pre>
+·-------------------------------------------|---------------------------|-------------|-----------------------------·
+|            Solc version: 0.8.9            ·  Optimizer enabled: true  ·  Runs: 200  ·  Block limit: 12450000 gas  │
+············································|···························|·············|······························
+|  Methods                                  ·              200 gwei/gas               ·       3254.11 usd/eth       │
+························|···················|·············|·············|·············|···············|··············
+|  Contract             ·  Method           ·  Min        ·  Max        ·  Avg        ·  # calls      ·  usd (avg)  │
+························|···················|·············|·············|·············|···············|··············
+|  GratitideCollection  ·  mint             ·     158975  ·     277560  ·     199437  ·            3  ·     129.80  │
+························|···················|·············|·············|·············|···············|··············
+|  GratitideCollection  ·  setBaseTokenURI  ·          -  ·          -  ·      47333  ·            1  ·      30.81  │
+························|···················|·············|·············|·············|···············|··············
+|  GratitideCollection  ·  withdraw         ·          -  ·          -  ·      52891  ·            1  ·      34.42  │
+························|···················|·············|·············|·············|···············|··············
+|  Deployments                              ·                                         ·  % of limit   ·             │
+············································|·············|·············|·············|···············|··············
+|  GratitideCollection                      ·          -  ·          -  ·    5130143  ·       41.2 %  ·    3338.81  │
+·-------------------------------------------|-------------|-------------|-------------|---------------|-------------·
+</pre>
