@@ -72,3 +72,9 @@ project and could change based on the cost of `ETH` itself.
 |  GratitideCollection                      ·          -  ·          -  ·    5130143  ·       41.2 %  ·    3338.81  │
 ·-------------------------------------------|-------------|-------------|-------------|---------------|-------------·
 </pre>
+
+### Verifying Contracts
+
+```bash
+$ npx hardhat verify --network testnet 0xBBe6cE8206d8Acc8F28137e3E479354946616DB8 "Qm..."
+```

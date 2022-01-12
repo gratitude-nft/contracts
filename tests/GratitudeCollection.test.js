@@ -22,6 +22,16 @@ async function getSigners(name, ...params) {
   return signers
 }
 
+function hashToken(recipient) {
+  return Buffer.from(
+    ethers.utils.solidityKeccak256(
+      ['string', 'address'],
+      ['authorized', recipient]
+    ).slice(2),
+    'hex'
+  )
+}
+
 describe('GratitideCollection Tests', function () {
   before(async function() {
     this.cidFolder = 'Qm123abc'
@@ -76,10 +86,16 @@ describe('GratitideCollection Tests', function () {
   })
   
   it('Should not mint', async function () {
-    const { tokenOwner1 } = this.signers
+    const { contractOwner, tokenOwner1 } = this.signers
     await expect(
       tokenOwner1.withContract.mint(3, { value: ethers.utils.parseEther('0.15') })
     ).to.be.revertedWith('Sale has not started')
+
+    const message = hashToken(tokenOwner1.address)
+    const signature = await contractOwner.signMessage(message)
+    await expect(
+      tokenOwner1.withContract.authorize(3, signature, { value: ethers.utils.parseEther('0.05') })
+    ).to.be.revertedWith('Presale has not started')
   })
   
   it('Should error when getting token URI', async function () {
@@ -87,6 +103,23 @@ describe('GratitideCollection Tests', function () {
     await expect(
       contractOwner.withContract.tokenURI(1)
     ).to.be.revertedWith('Collection not released yet')
+  })
+
+  it('Should time travel to Feb 13, 2021', async function () {  
+    await ethers.provider.send('evm_mine');
+    await ethers.provider.send('evm_setNextBlockTimestamp', [1644710400]); 
+    await ethers.provider.send('evm_mine');
+  })
+
+  it('Should authorize', async function () {
+    const { contractOwner, tokenOwner1 } = this.signers
+
+    const message = hashToken(tokenOwner1.address)
+    const signature = await contractOwner.signMessage(message)
+    await tokenOwner1.withContract.authorize(2, signature, { value: ethers.utils.parseEther('0.10') })
+
+    expect(await contractOwner.withContract.ownerOf(17)).to.equal(tokenOwner1.address)
+    expect(await contractOwner.withContract.ownerOf(18)).to.equal(tokenOwner1.address)
   })
 
   it('Should time travel to Feb 22, 2021', async function () {  
@@ -98,12 +131,10 @@ describe('GratitideCollection Tests', function () {
   it('Should mint', async function () {
     const { contractOwner, tokenOwner1 } = this.signers
     await tokenOwner1.withContract.mint(1, { value: ethers.utils.parseEther('0.05') })
-    await tokenOwner1.withContract.mint(1, { value: ethers.utils.parseEther('0.05') })
     await tokenOwner1.withContract.mint(2, { value: ethers.utils.parseEther('0.10') })
-    expect(await contractOwner.withContract.ownerOf(17)).to.equal(tokenOwner1.address)
-    expect(await contractOwner.withContract.ownerOf(18)).to.equal(tokenOwner1.address)
     expect(await contractOwner.withContract.ownerOf(19)).to.equal(tokenOwner1.address)
     expect(await contractOwner.withContract.ownerOf(20)).to.equal(tokenOwner1.address)
+    expect(await contractOwner.withContract.ownerOf(21)).to.equal(tokenOwner1.address)
   })
 
   it('Should not allow to mint more than 5', async function () {
