@@ -19,22 +19,31 @@ contract GratitideCollection is ERC721Base, ReentrancyGuard {
   uint8 public constant MAX_PURCHASE = 5;
   //start date of the token sale
   //Feb 13, 2022 20:22:00 GTM
-  uint64 public constant PRESALE_DATE = 1644710400;
+  //uint64 public constant PRESALE_DATE = 1644710400;
+  uint64 public constant PRESALE_DATE = 1;
   //Feb 22, 2022 20:22:00 GTM
-  uint64 public constant SALE_DATE = 1645561320;
+  //uint64 public constant SALE_DATE = 1645561320;
+  uint64 public constant SALE_DATE = 1;
   //the sale price per token
   uint256 public constant SALE_PRICE = 0.05 ether;
-  //the IPFS CID folder
-  string public CID_FOLDER;
+  //the provenance hash (the CID)
+  string public PROVENANCE;
   //the offset to be used to determine what token id should get which CID
   uint16 public indexOffset;
+  //mapping of token id to custom uri
+  mapping(uint256 => string) public customURI;
+  //mapping of ambassador address to whether if they redeemed already
+  mapping(address => bool) public ambassadors;
 
   // ============ Deploy ============
 
   /**
    * @dev Sets up ERC721Base. Permanently sets the IPFS CID
    */
-  constructor(string memory cid) ERC721Base(
+  constructor(
+    string memory uri, 
+    string memory cid
+  ) ERC721Base(
     //name
     "Gratitide Collection",
     //symbol 
@@ -42,13 +51,10 @@ contract GratitideCollection is ERC721Base, ReentrancyGuard {
     //max supply
     2222
   ) {
-    CID_FOLDER = cid;
-    //set once, use multiple times...
-    address sender = _msgSender();
-    //reserve the first 16
-    for(uint i = 0; i < 16; i++) {
-      _safeMint(sender);
-    }
+    //make cid immutable
+    PROVENANCE = cid;
+    //set the initial base uri
+    _setBaseTokenURI(uri);
   }
 
   // ============ Read Methods ============
@@ -68,7 +74,7 @@ contract GratitideCollection is ERC721Base, ReentrancyGuard {
   function contractURI() public view returns (string memory) {
     //ex. https://ipfs.io/ipfs/ + Qm123abc + /contract.json
     return string(
-      abi.encodePacked(baseTokenURI(), CID_FOLDER, "/contract.json")
+      abi.encodePacked(baseTokenURI(), PROVENANCE, "/contract.json")
     );
   }
 
@@ -79,28 +85,31 @@ contract GratitideCollection is ERC721Base, ReentrancyGuard {
   function tokenURI(uint256 tokenId) 
     public view virtual override returns(string memory) 
   {
-    require(indexOffset > 0, "Collection not released yet");
     require(_exists(tokenId), "URI query for nonexistent token");
-    //if founder tokens (1-4)
-    if (tokenId <= 4) {
-      //ex. https://ipfs.io/ipfs/ + Qm123abc + / + 0 + .json
-      //ex. https://ipfs.io/ipfs/ + Qm123abc + / + 1 + .json
-      //ex. https://ipfs.io/ipfs/ + Qm123abc + / + 2 + .json
-      //ex. https://ipfs.io/ipfs/ + Qm123abc + / + 3 + .json
+    
+    //if there is a custom URI
+    if (bytes(customURI[tokenId]).length > 0) {
+      //return that
+      return customURI[tokenId];
+    }
+
+    //if no offset
+    if (indexOffset == 0) {
+      //use the placeholder
       return string(
-        abi.encodePacked(baseTokenURI(), CID_FOLDER, "/", tokenId.sub(1).toString(), ".json")
+        abi.encodePacked(baseTokenURI(), PROVENANCE, "/placeholder.json")
       );
     }
 
     //for example, given offset is 2 and size is 8:
-    // - token 5 = ((5 - 4 + 2) % (8 - 4)) + 4 = 7 
-    // - token 6 = ((6 - 4 + 2) % (8 - 4)) + 4 = 4
-    // - token 7 = ((7 - 4 + 2) % (8 - 4)) + 4 = 5
-    // - token 8 = ((8 - 4 + 2) % (8 - 4)) + 4 = 6
-    uint256 index = tokenId.sub(4).add(indexOffset).mod(MAX_SUPPLY - 4).add(4);
+    // - token 5 = ((5 + 2) % 8) + 1 = 8
+    // - token 6 = ((6 + 2) % 8) + 1 = 1
+    // - token 7 = ((7 + 2) % 8) + 1 = 2
+    // - token 8 = ((8 + 2) % 8) + 1 = 3
+    uint256 index = tokenId.add(indexOffset).mod(MAX_SUPPLY).add(1);
     //ex. https://ipfs.io/ + Qm123abc + / + 1000 + .json
     return string(
-      abi.encodePacked(baseTokenURI(), CID_FOLDER, "/", index.toString(), ".json")
+      abi.encodePacked(baseTokenURI(), PROVENANCE, "/", index.toString(), ".json")
     );
   }
 
@@ -143,6 +152,39 @@ contract GratitideCollection is ERC721Base, ReentrancyGuard {
     require(uint64(block.timestamp) >= SALE_DATE, "Sale has not started");
     //now purchase token
     _buy(quantity, _msgSender());
+  }
+
+  /**
+   * @dev Allows an ambassador to redeem their tokens
+   */
+  function redeem(string memory uri, bool ambassador, bytes memory proof) 
+    external virtual 
+  {
+    address recipient = _msgSender();
+    //check to see if they redeemed already
+    require(ambassadors[recipient] == false, "Already redeemed");
+
+    //make sure the minter signed this off
+    require(hasRole(MINTER_ROLE, ECDSA.recover(
+      ECDSA.toEthSignedMessageHash(
+        keccak256(abi.encodePacked("redeemable", uri, recipient, ambassador))
+      ),
+      proof
+    )), "Invalid proof.");
+
+    //mint token
+    _safeMint(recipient);
+    //add custom uri, so we know what token to customize
+    customURI[lastId()] = uri;
+    //flag that an ambassador has redeemed
+    ambassadors[recipient] = true;
+    //if they are apart of the founding team
+    if (!ambassador) {
+      //mint 3 for them too
+      for(uint i = 0; i < 3; i++) {
+        _safeMint(recipient);
+      }
+    }
   }
 
   /**

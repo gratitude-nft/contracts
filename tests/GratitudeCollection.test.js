@@ -22,7 +22,7 @@ async function getSigners(name, ...params) {
   return signers
 }
 
-function hashToken(recipient) {
+function authorizeToken(recipient) {
   return Buffer.from(
     ethers.utils.solidityKeccak256(
       ['string', 'address'],
@@ -32,9 +32,33 @@ function hashToken(recipient) {
   )
 }
 
+function redeemToken(uri, recipient, ambassador) {
+  return Buffer.from(
+    ethers.utils.solidityKeccak256(
+      ['string', 'string', 'address', 'bool'],
+      ['redeemable', uri, recipient, ambassador]
+    ).slice(2),
+    'hex'
+  )
+}
+
 describe('GratitideCollection Tests', function () {
   before(async function() {
-    this.cidFolder = 'Qm123abc'
+    this.uri = 'https://gateway.pinata.cloud/ipfs/'
+    this.cid = 'QmWeGPZFsKiYLNMuuwJcWCzAfHXuMN53FtwY4Wbij8ZVHG'
+
+    this.ambassadors = [
+      'https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000001.json',
+      'https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000002.json',
+      'https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000003.json',
+      'https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000004.json',
+      'https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000005.json',
+      'https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000006.json',
+      'https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000007.json',
+      'https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000008.json',
+      'https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000009.json',
+      'https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000010.json'
+    ]
     
     const [
       contractOwner, 
@@ -42,9 +66,9 @@ describe('GratitideCollection Tests', function () {
       founder2,
       tokenOwner1, 
       tokenOwner2, 
-      tokenOwner3, 
-      tokenOwner4 
-    ] = await getSigners('GratitideCollection', this.cidFolder)
+      ambassador1, 
+      ambassador2 
+    ] = await getSigners('GratitideCollection', this.uri, this.cid)
     
     this.signers = { 
       contractOwner, 
@@ -52,37 +76,40 @@ describe('GratitideCollection Tests', function () {
       founder2,
       tokenOwner1, 
       tokenOwner2, 
-      tokenOwner3, 
-      tokenOwner4 
+      ambassador1, 
+      ambassador2 
     }
   })
   
   it('Should get contract uri', async function () {
     const { contractOwner } = this.signers
-    await contractOwner.withContract.setBaseTokenURI('https://ipfs.io/ipfs/')
     expect(
       await contractOwner.withContract.contractURI()
-    ).to.equal('https://ipfs.io/ipfs/Qm123abc/contract.json')
+    ).to.equal(`${this.uri}${this.cid}/contract.json`)
   })
   
-  it('Should reserve the first 16 tokens', async function () {
-    const { contractOwner } = this.signers
-    expect(await contractOwner.withContract.ownerOf(1)).to.equal(contractOwner.address)
-    expect(await contractOwner.withContract.ownerOf(2)).to.equal(contractOwner.address)
-    expect(await contractOwner.withContract.ownerOf(3)).to.equal(contractOwner.address)
-    expect(await contractOwner.withContract.ownerOf(4)).to.equal(contractOwner.address)
-    expect(await contractOwner.withContract.ownerOf(5)).to.equal(contractOwner.address)
-    expect(await contractOwner.withContract.ownerOf(6)).to.equal(contractOwner.address)
-    expect(await contractOwner.withContract.ownerOf(7)).to.equal(contractOwner.address)
-    expect(await contractOwner.withContract.ownerOf(8)).to.equal(contractOwner.address)
-    expect(await contractOwner.withContract.ownerOf(9)).to.equal(contractOwner.address)
-    expect(await contractOwner.withContract.ownerOf(10)).to.equal(contractOwner.address)
-    expect(await contractOwner.withContract.ownerOf(11)).to.equal(contractOwner.address)
-    expect(await contractOwner.withContract.ownerOf(12)).to.equal(contractOwner.address)
-    expect(await contractOwner.withContract.ownerOf(13)).to.equal(contractOwner.address)
-    expect(await contractOwner.withContract.ownerOf(14)).to.equal(contractOwner.address)
-    expect(await contractOwner.withContract.ownerOf(15)).to.equal(contractOwner.address)
-    expect(await contractOwner.withContract.ownerOf(16)).to.equal(contractOwner.address)
+  it('Should redeem', async function () {
+    const { contractOwner, ambassador1, ambassador2 } = this.signers
+
+    const message1 = redeemToken(this.ambassadors[0], ambassador1.address, false)
+    const signature1 = await contractOwner.signMessage(message1)
+    await ambassador1.withContract.redeem(this.ambassadors[0], false, signature1)
+
+    expect(await contractOwner.withContract.ownerOf(1)).to.equal(ambassador1.address)
+    expect(await contractOwner.withContract.ownerOf(2)).to.equal(ambassador1.address)
+    expect(await contractOwner.withContract.ownerOf(3)).to.equal(ambassador1.address)
+    expect(await contractOwner.withContract.ownerOf(4)).to.equal(ambassador1.address)
+    expect(await contractOwner.withContract.tokenURI(1)).to.equal(this.ambassadors[0])
+    expect(await contractOwner.withContract.tokenURI(2)).to.equal(`${this.uri}${this.cid}/placeholder.json`)
+    expect(await contractOwner.withContract.tokenURI(3)).to.equal(`${this.uri}${this.cid}/placeholder.json`)
+    expect(await contractOwner.withContract.tokenURI(4)).to.equal(`${this.uri}${this.cid}/placeholder.json`)
+
+    const message2 = redeemToken(this.ambassadors[1], ambassador2.address, true)
+    const signature2 = await contractOwner.signMessage(message2)
+    await ambassador2.withContract.redeem(this.ambassadors[1], true, signature2)
+
+    expect(await contractOwner.withContract.ownerOf(5)).to.equal(ambassador2.address)
+    expect(await contractOwner.withContract.tokenURI(5)).to.equal(this.ambassadors[1])
   })
   
   it('Should not mint', async function () {
@@ -91,7 +118,7 @@ describe('GratitideCollection Tests', function () {
       tokenOwner1.withContract.mint(3, { value: ethers.utils.parseEther('0.15') })
     ).to.be.revertedWith('Sale has not started')
 
-    const message = hashToken(tokenOwner1.address)
+    const message = authorizeToken(tokenOwner1.address)
     const signature = await contractOwner.signMessage(message)
     await expect(
       tokenOwner1.withContract.authorize(3, signature, { value: ethers.utils.parseEther('0.05') })
@@ -101,8 +128,8 @@ describe('GratitideCollection Tests', function () {
   it('Should error when getting token URI', async function () {
     const { contractOwner } = this.signers
     await expect(
-      contractOwner.withContract.tokenURI(1)
-    ).to.be.revertedWith('Collection not released yet')
+      contractOwner.withContract.tokenURI(6)
+    ).to.be.revertedWith('URI query for nonexistent token')
   })
 
   it('Should time travel to Feb 13, 2021', async function () {  
@@ -114,12 +141,12 @@ describe('GratitideCollection Tests', function () {
   it('Should authorize', async function () {
     const { contractOwner, tokenOwner1 } = this.signers
 
-    const message = hashToken(tokenOwner1.address)
+    const message = authorizeToken(tokenOwner1.address)
     const signature = await contractOwner.signMessage(message)
     await tokenOwner1.withContract.authorize(2, signature, { value: ethers.utils.parseEther('0.10') })
 
-    expect(await contractOwner.withContract.ownerOf(17)).to.equal(tokenOwner1.address)
-    expect(await contractOwner.withContract.ownerOf(18)).to.equal(tokenOwner1.address)
+    expect(await contractOwner.withContract.ownerOf(6)).to.equal(tokenOwner1.address)
+    expect(await contractOwner.withContract.ownerOf(7)).to.equal(tokenOwner1.address)
   })
 
   it('Should time travel to Feb 22, 2021', async function () {  
@@ -132,9 +159,9 @@ describe('GratitideCollection Tests', function () {
     const { contractOwner, tokenOwner1 } = this.signers
     await tokenOwner1.withContract.mint(1, { value: ethers.utils.parseEther('0.05') })
     await tokenOwner1.withContract.mint(2, { value: ethers.utils.parseEther('0.10') })
-    expect(await contractOwner.withContract.ownerOf(19)).to.equal(tokenOwner1.address)
-    expect(await contractOwner.withContract.ownerOf(20)).to.equal(tokenOwner1.address)
-    expect(await contractOwner.withContract.ownerOf(21)).to.equal(tokenOwner1.address)
+    expect(await contractOwner.withContract.ownerOf(8)).to.equal(tokenOwner1.address)
+    expect(await contractOwner.withContract.ownerOf(9)).to.equal(tokenOwner1.address)
+    expect(await contractOwner.withContract.ownerOf(10)).to.equal(tokenOwner1.address)
   })
 
   it('Should not allow to mint more than 5', async function () {
@@ -142,13 +169,6 @@ describe('GratitideCollection Tests', function () {
     await expect(
       tokenOwner1.withContract.mint(3, { value: ethers.utils.parseEther('0.15') })
     ).to.be.revertedWith('Cannot mint more than allowed')
-  })
-
-  it('Should error when getting token URI', async function () {
-    const { contractOwner } = this.signers
-    await expect(
-      contractOwner.withContract.tokenURI(17)
-    ).to.be.revertedWith('Collection not released yet')
   })
 
   it('Should withdraw', async function () {
@@ -176,27 +196,11 @@ describe('GratitideCollection Tests', function () {
     const max = parseInt(await contractOwner.withContract.MAX_SUPPLY())
     const offset = parseInt(await contractOwner.withContract.indexOffset())
 
-    expect(
-      await contractOwner.withContract.tokenURI(1)
-    ).to.equal('https://ipfs.io/ipfs/Qm123abc/0.json')
-
-    expect(
-      await contractOwner.withContract.tokenURI(2)
-    ).to.equal('https://ipfs.io/ipfs/Qm123abc/1.json')
-
-    expect(
-      await contractOwner.withContract.tokenURI(3)
-    ).to.equal('https://ipfs.io/ipfs/Qm123abc/2.json')
-
-    expect(
-      await contractOwner.withContract.tokenURI(4)
-    ).to.equal('https://ipfs.io/ipfs/Qm123abc/3.json')
-
-    for (i = 5; i <= 20; i++) {
-      const index = ((i - 4 + offset) % (max - 4)) + 4
+    for (i = 6; i <= 10; i++) {
+      const index = ((i + offset) % max) + 1
       expect(
         await contractOwner.withContract.tokenURI(i)
-      ).to.equal(`https://ipfs.io/ipfs/Qm123abc/${index}.json`)
+      ).to.equal(`${this.uri}${this.cid}/${index}.json`)
     }
   })
 })

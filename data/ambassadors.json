@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Eric",
+    "ambassador": false,
+    "recipient": "0x528a0B13036D072581D583Ad5363Da586823Af8f",
+    "uri": "https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000001.json"
+  },
+  {
+    "name": "Eric",
+    "ambassador": true,
+    "recipient": "0xbDB75BE3AbC4d48B85A8B15Bb3107009085CC295",
+    "uri": "https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000002.json"
+  },
+  {
+    "name": "Chris",
+    "ambassador": false,
+    "recipient": "0xD7D190cdC6A7053CD5Ee76E966a1b9056dbA4774",
+    "uri": "https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000003.json"
+  }
+]
