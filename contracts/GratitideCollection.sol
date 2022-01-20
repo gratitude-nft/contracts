@@ -19,11 +19,9 @@ contract GratitideCollection is ERC721Base, ReentrancyGuard {
   uint8 public constant MAX_PURCHASE = 5;
   //start date of the token sale
   //Feb 13, 2022 20:22:00 GTM
-  //uint64 public constant PRESALE_DATE = 1644710400;
-  uint64 public constant PRESALE_DATE = 1;
+  uint64 public constant PRESALE_DATE = 1644710400;
   //Feb 22, 2022 20:22:00 GTM
-  //uint64 public constant SALE_DATE = 1645561320;
-  uint64 public constant SALE_DATE = 1;
+  uint64 public constant SALE_DATE = 1645561320;
   //the sale price per token
   uint256 public constant SALE_PRICE = 0.05 ether;
   //the provenance hash (the CID)

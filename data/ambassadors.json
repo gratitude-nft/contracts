@@ -1,20 +1,72 @@
 [
   {
-    "name": "Eric",
+    "name": "Erwin",
     "ambassador": false,
-    "recipient": "0x528a0B13036D072581D583Ad5363Da586823Af8f",
-    "uri": "https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000001.json"
+    "recipient": "",
+    "uri": "https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000001.json",
+    "proof": ""
   },
   {
-    "name": "Eric",
-    "ambassador": true,
-    "recipient": "0xbDB75BE3AbC4d48B85A8B15Bb3107009085CC295",
-    "uri": "https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000002.json"
+    "name": "Ray",
+    "ambassador": false,
+    "recipient": "",
+    "uri": "https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000002.json",
+    "proof": ""
   },
   {
     "name": "Chris",
     "ambassador": false,
     "recipient": "0xD7D190cdC6A7053CD5Ee76E966a1b9056dbA4774",
-    "uri": "https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000003.json"
+    "uri": "https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000003.json",
+    "proof": ""
+  },
+  {
+    "name": "Eric",
+    "ambassador": false,
+    "recipient": "0x528a0B13036D072581D583Ad5363Da586823Af8f",
+    "uri": "https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000004.json",
+    "proof": "0xb7b57922c115f4ebed16cec51429b138a95fa0d91fafcb7a45a4e0d4a8b08dcd53c54cc34378d66d7c1259ec4b8676f164c87d8f89ba6d03638fb25a4a0c99511b"
+  },
+  {
+    "name": "Matthew",
+    "ambassador": false,
+    "recipient": "",
+    "uri": "https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000005.json",
+    "proof": ""
+  },
+  {
+    "name": "Caroline",
+    "ambassador": false,
+    "recipient": "",
+    "uri": "https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000006.json",
+    "proof": ""
+  },
+  {
+    "name": "Octopizzo",
+    "ambassador": true,
+    "recipient": "",
+    "uri": "https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000007.json",
+    "proof": ""
+  },
+  {
+    "name": "Ambassador 2",
+    "ambassador": true,
+    "recipient": "",
+    "uri": "https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000008.json",
+    "proof": ""
+  },
+  {
+    "name": "Ambassador 3",
+    "ambassador": true,
+    "recipient": "",
+    "uri": "https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000009.json",
+    "proof": ""
+  },
+  {
+    "name": "Ambassador 4",
+    "ambassador": true,
+    "recipient": "",
+    "uri": "https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000010.json",
+    "proof": ""
   }
 ]

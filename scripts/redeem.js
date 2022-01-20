@@ -1,5 +1,5 @@
 //to run this on testnet:
-// $ npx hardhat run scripts/authorize.js
+// $ npx hardhat run scripts/redeem.js
 
 const hardhat = require('hardhat')
 const ambassadors = require('../data/ambassadors.json')
@@ -28,7 +28,7 @@ async function main() {
       ambassadors[i].ambassador
     )
     const signature = await signer.signMessage(message)
-    console.log(`${whitelist[i].recipient}, ${signature}`)
+    console.log(`${ambassadors[i].recipient}, ${signature}`)
   }
 }
 
