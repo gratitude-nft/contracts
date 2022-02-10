@@ -2,14 +2,14 @@
   {
     "name": "Erwin",
     "ambassador": false,
-    "recipient": "",
+    "recipient": "0xf1Fd65AddC3820D3Bdca18006A612CbEeDD28854",
     "uri": "https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000001.json",
-    "proof": ""
+    "proof": "0xd99c07ed29691bcf8642351d321a64d54d097f8951afac09cfc8e0cffa080e212f869cdc2a7ed2c7c44019bc2cb9c561507b95ac86767547c1b77020ff4c42871c"
   },
   {
     "name": "Ray",
     "ambassador": false,
-    "recipient": "",
+    "recipient": "0x3a9653e6cA8cf0dF140510eb9edbe4B5B7a6Af54",
     "uri": "https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000002.json",
     "proof": ""
   },
@@ -30,7 +30,7 @@
   {
     "name": "Matthew",
     "ambassador": false,
-    "recipient": "",
+    "recipient": "0x2a53F5531Db85DeAc0a5022411eAc251fcf732C2",
     "uri": "https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000005.json",
     "proof": ""
   },
@@ -65,7 +65,7 @@
   {
     "name": "Ambassador 4",
     "ambassador": true,
-    "recipient": "",
+    "recipient": "0x5401f2D2ffd9D7838402b346d4eCD6B823293f6d",
     "uri": "https://gateway.pinata.cloud/ipfs/QmdEx27SazwDr6jBvQQQziGjsuXga8NCCFj51dEZen9cLe/1000010.json",
     "proof": ""
   }

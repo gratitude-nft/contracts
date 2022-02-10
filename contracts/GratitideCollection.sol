@@ -52,7 +52,7 @@ contract GratitideCollection is ERC721Base, ReentrancyGuard {
     //make cid immutable
     PROVENANCE = cid;
     //set the initial base uri
-    _setBaseTokenURI(uri);
+    _setBaseURI(uri);
   }
 
   // ============ Read Methods ============
@@ -170,19 +170,20 @@ contract GratitideCollection is ERC721Base, ReentrancyGuard {
       proof
     )), "Invalid proof.");
 
-    //mint token
-    _safeMint(recipient);
-    //add custom uri, so we know what token to customize
-    customURI[lastId()] = uri;
-    //flag that an ambassador has redeemed
-    ambassadors[recipient] = true;
-    //if they are apart of the founding team
-    if (!ambassador) {
-      //mint 3 for them too
-      for(uint i = 0; i < 3; i++) {
-        _safeMint(recipient);
-      }
+    uint256 nextTokenId = lastTokenId() + 1;
+
+    //if ambassador
+    if (ambassador) {
+      //mint token
+      _safeMint(recipient, 1);
+    } else { //they are apart of the founding team
+      _safeMint(recipient, 4);
     }
+
+    //add custom uri, so we know what token to customize
+    customURI[nextTokenId] = uri;
+    //flag that an ambassador/founder has redeemed
+    ambassadors[recipient] = true;
   }
 
   /**
@@ -190,9 +191,11 @@ contract GratitideCollection is ERC721Base, ReentrancyGuard {
    */
   function withdraw() external virtual onlyRole(DEFAULT_ADMIN_ROLE) {
     //set the offset
-    indexOffset = uint16(block.number - 1) % MAX_SUPPLY;
     if (indexOffset == 0) {
-      indexOffset = 1;
+      indexOffset = uint16(block.number - 1) % MAX_SUPPLY;
+      if (indexOffset == 0) {
+        indexOffset = 1;
+      }
     }
 
     uint balance = address(this).balance;
@@ -227,10 +230,7 @@ contract GratitideCollection is ERC721Base, ReentrancyGuard {
       "Amount exceeds total allowable collection"
     );
 
-    //loop through quantity and mint
-    for(uint i = 0; i < quantity; i++) {
-      _safeMint(recipient);
-    }
+    _safeMint(recipient, quantity);
   }
 
   // ============ Metadata Methods ============
@@ -243,6 +243,6 @@ contract GratitideCollection is ERC721Base, ReentrancyGuard {
   function setBaseTokenURI(string memory uri) 
     external virtual onlyRole(CURATOR_ROLE) 
   {
-    _setBaseTokenURI(uri);
+    _setBaseURI(uri);
   }
 }

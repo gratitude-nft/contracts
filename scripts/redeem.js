@@ -22,6 +22,9 @@ async function main() {
   console.log('address, key')
   //make a message
   for (let i = 0; i < ambassadors.length; i++) {
+    if (!ambassadors[i].recipient) {
+      continue;
+    }
     const message = hashToken(
       ambassadors[i].uri, 
       ambassadors[i].recipient, 
