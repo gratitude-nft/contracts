@@ -18,16 +18,18 @@ contract GratitideCollection is ERC721Base, ReentrancyGuard {
   //maximum amount that can be purchased at a time
   uint8 public constant MAX_PURCHASE = 5;
   //start date of the token sale
-  //Feb 13, 2022 20:22:00 GTM
-  uint64 public constant PRESALE_DATE = 1644710400;
   //Feb 22, 2022 20:22:00 GTM
-  uint64 public constant SALE_DATE = 1645561320;
+  uint64 public constant PRESALE_DATE = 1645561320;
+  //Mar 1, 2022 20:22:00 GTM
+  uint64 public constant SALE_DATE = 1646092800;
   //the sale price per token
   uint256 public constant SALE_PRICE = 0.05 ether;
   //the provenance hash (the CID)
   string public PROVENANCE;
   //the offset to be used to determine what token id should get which CID
   uint16 public indexOffset;
+  //mapping of address to amount minted
+  mapping(address => uint256) public minted;
   //mapping of token id to custom uri
   mapping(uint256 => string) public customURI;
   //mapping of ambassador address to whether if they redeemed already
@@ -208,15 +210,12 @@ contract GratitideCollection is ERC721Base, ReentrancyGuard {
   function _buy(uint256 quantity, address recipient) internal virtual {
     //make sure recipient is a valid address
     require(recipient != address(0), "Invalid recipient");
-    //fix for valid quantity
-    if (quantity == 0) {
-      quantity = 1;
-    }
+    require(quantity > 0, "Invalid amount");
 
-    //the quantity here plus the current balance 
+    //the quantity here plus the current amount already minted 
     //should be less than the max purchase amount
     require(
-      quantity.add(balanceOf(recipient)) <= MAX_PURCHASE, 
+      quantity.add(minted[recipient]) <= MAX_PURCHASE, 
       "Cannot mint more than allowed"
     );
     //the value sent should be the price times quantity
@@ -231,6 +230,7 @@ contract GratitideCollection is ERC721Base, ReentrancyGuard {
     );
 
     _safeMint(recipient, quantity);
+    minted[recipient] += quantity;
   }
 
   // ============ Metadata Methods ============

@@ -132,9 +132,9 @@ describe('GratitideCollection Tests', function () {
     ).to.be.revertedWith('URI query for nonexistent token')
   })
 
-  it('Should time travel to Feb 13, 2021', async function () {  
+  it('Should time travel to Feb 22, 2021', async function () {  
     await ethers.provider.send('evm_mine');
-    await ethers.provider.send('evm_setNextBlockTimestamp', [1644710400]); 
+    await ethers.provider.send('evm_setNextBlockTimestamp', [1645561320]); 
     await ethers.provider.send('evm_mine');
   })
 
@@ -149,9 +149,9 @@ describe('GratitideCollection Tests', function () {
     expect(await contractOwner.withContract.ownerOf(7)).to.equal(tokenOwner1.address)
   })
 
-  it('Should time travel to Feb 22, 2021', async function () {  
+  it('Should time travel to Mar 1, 2021', async function () {  
     await ethers.provider.send('evm_mine');
-    await ethers.provider.send('evm_setNextBlockTimestamp', [1645561320]); 
+    await ethers.provider.send('evm_setNextBlockTimestamp', [1646092800]); 
     await ethers.provider.send('evm_mine');
   })
 
