@@ -228,11 +228,11 @@ contract GratitudeGang is
    * @dev Allows an ambassador to redeem their tokens
    */
   function redeem(
+    address recipient,
     string memory uri, 
     bool ambassador, 
     bytes memory proof
   ) external virtual {
-    address recipient = _msgSender();
     //check to see if they redeemed already
     if(ambassadors[recipient] != false) revert AlreadyRedeemed();
 

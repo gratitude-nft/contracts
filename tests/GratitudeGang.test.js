@@ -94,7 +94,7 @@ describe('GratitudeGang Tests', function () {
 
     const message1 = redeemToken(this.ambassadors[0], ambassador1.address, false)
     const signature1 = await contractOwner.signMessage(message1)
-    await ambassador1.withContract.redeem(this.ambassadors[0], false, signature1)
+    await ambassador1.withContract.redeem(ambassador1.address, this.ambassadors[0], false, signature1)
 
     expect(await contractOwner.withContract.ownerOf(2)).to.equal(ambassador1.address)
     expect(await contractOwner.withContract.ownerOf(3)).to.equal(ambassador1.address)
@@ -107,7 +107,7 @@ describe('GratitudeGang Tests', function () {
 
     const message2 = redeemToken(this.ambassadors[1], ambassador2.address, true)
     const signature2 = await contractOwner.signMessage(message2)
-    await ambassador2.withContract.redeem(this.ambassadors[1], true, signature2)
+    await ambassador2.withContract.redeem(ambassador2.address, this.ambassadors[1], true, signature2)
 
     expect(await contractOwner.withContract.ownerOf(6)).to.equal(ambassador2.address)
     expect(await contractOwner.withContract.tokenURI(6)).to.equal(this.ambassadors[1])
