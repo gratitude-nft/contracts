@@ -30,9 +30,12 @@ contract GratitudeGang is
   using SafeMath for uint256;
 
   // ============ Constants ============
+
+  //bytes4(keccak256("royaltyInfo(uint256,uint256)")) == 0x2a55205a
+  bytes4 internal constant _INTERFACE_ID_ERC2981 = 0x2a55205a;
   
   //max amount that can be minted in this collection
-  uint16 public constant MAX_SUPPLY = 10000;
+  uint16 public constant MAX_SUPPLY = 2222;
   //maximum amount that can be purchased per wallet
   uint8 public constant MAX_PURCHASE = 5;
   //the whitelist price per token
@@ -72,9 +75,50 @@ contract GratitudeGang is
   ) ERC721B("Gratitude Gang", "GRATITUDE") {
     _setContractURI(uri);
     previewURI = preview;
+    _safeMint(owner(), 1);
+
   }
 
   // ============ Read Methods ============
+
+  /** 
+   * @dev ERC165 bytes to add to interface array - set in parent contract
+   *  implementing this standard
+   * 
+   *  bytes4(keccak256("royaltyInfo(uint256,uint256)")) == 0x2a55205a
+   *  bytes4 private constant _INTERFACE_ID_ERC2981 = 0x2a55205a;
+   *  _registerInterface(_INTERFACE_ID_ERC2981);
+   */
+  function royaltyInfo(
+    uint256 _tokenId,
+    uint256 _salePrice
+  ) external view returns (
+    address receiver,
+    uint256 royaltyAmount
+  ) {
+    if (!_exists(_tokenId)) revert NonExistentToken();
+    return (
+      payable(owner()), 
+      _salePrice.mul(1000).div(10000)
+    );
+  }
+
+  /**
+   * @dev See {IERC165-supportsInterface}.
+   */
+  function supportsInterface(bytes4 interfaceId)
+    public
+    view
+    virtual
+    override
+    returns(bool)
+  {
+    //support ERC2981
+    if (interfaceId == _INTERFACE_ID_ERC2981) {
+      return true;
+    }
+    return super.supportsInterface(interfaceId);
+  }
 
   /**
    * @dev Combines the base token URI and the token CID to form a full 

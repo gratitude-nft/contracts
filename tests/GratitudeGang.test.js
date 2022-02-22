@@ -96,21 +96,21 @@ describe('GratitudeGang Tests', function () {
     const signature1 = await contractOwner.signMessage(message1)
     await ambassador1.withContract.redeem(this.ambassadors[0], false, signature1)
 
-    expect(await contractOwner.withContract.ownerOf(1)).to.equal(ambassador1.address)
     expect(await contractOwner.withContract.ownerOf(2)).to.equal(ambassador1.address)
     expect(await contractOwner.withContract.ownerOf(3)).to.equal(ambassador1.address)
     expect(await contractOwner.withContract.ownerOf(4)).to.equal(ambassador1.address)
-    expect(await contractOwner.withContract.tokenURI(1)).to.equal(this.ambassadors[0])
-    expect(await contractOwner.withContract.tokenURI(2)).to.equal(this.preview)
+    expect(await contractOwner.withContract.ownerOf(5)).to.equal(ambassador1.address)
+    expect(await contractOwner.withContract.tokenURI(2)).to.equal(this.ambassadors[0])
     expect(await contractOwner.withContract.tokenURI(3)).to.equal(this.preview)
     expect(await contractOwner.withContract.tokenURI(4)).to.equal(this.preview)
+    expect(await contractOwner.withContract.tokenURI(5)).to.equal(this.preview)
 
     const message2 = redeemToken(this.ambassadors[1], ambassador2.address, true)
     const signature2 = await contractOwner.signMessage(message2)
     await ambassador2.withContract.redeem(this.ambassadors[1], true, signature2)
 
-    expect(await contractOwner.withContract.ownerOf(5)).to.equal(ambassador2.address)
-    expect(await contractOwner.withContract.tokenURI(5)).to.equal(this.ambassadors[1])
+    expect(await contractOwner.withContract.ownerOf(6)).to.equal(ambassador2.address)
+    expect(await contractOwner.withContract.tokenURI(6)).to.equal(this.ambassadors[1])
   })
   
   it('Should not mint', async function () {
@@ -129,7 +129,7 @@ describe('GratitudeGang Tests', function () {
   it('Should error when getting token URI', async function () {
     const { contractOwner } = this.signers
     await expect(
-      contractOwner.withContract.tokenURI(6)
+      contractOwner.withContract.tokenURI(7)
     ).to.be.revertedWith('NonExistentToken()')
   })
 
@@ -149,8 +149,8 @@ describe('GratitudeGang Tests', function () {
     const signature = await contractOwner.signMessage(message)
     await tokenOwner1.withContract.authorize(2, signature, { value: ethers.utils.parseEther('0.10') })
 
-    expect(await contractOwner.withContract.ownerOf(6)).to.equal(tokenOwner1.address)
     expect(await contractOwner.withContract.ownerOf(7)).to.equal(tokenOwner1.address)
+    expect(await contractOwner.withContract.ownerOf(8)).to.equal(tokenOwner1.address)
   })
 
   it('Should not authorize with wrong amount', async function () {
@@ -184,9 +184,9 @@ describe('GratitudeGang Tests', function () {
     const { contractOwner, tokenOwner1 } = this.signers
     await tokenOwner1.withContract.mint(1, { value: ethers.utils.parseEther('0.08') })
     await tokenOwner1.withContract.mint(2, { value: ethers.utils.parseEther('0.16') })
-    expect(await contractOwner.withContract.ownerOf(8)).to.equal(tokenOwner1.address)
     expect(await contractOwner.withContract.ownerOf(9)).to.equal(tokenOwner1.address)
     expect(await contractOwner.withContract.ownerOf(10)).to.equal(tokenOwner1.address)
+    expect(await contractOwner.withContract.ownerOf(11)).to.equal(tokenOwner1.address)
   })
 
   it('Should not allow to mint with wrong amount', async function () {
@@ -234,11 +234,19 @@ describe('GratitudeGang Tests', function () {
     const max = parseInt(await contractOwner.withContract.MAX_SUPPLY())
     const offset = parseInt(await contractOwner.withContract.indexOffset())
 
-    for (i = 6; i <= 10; i++) {
+    for (i = 7; i <= 11; i++) {
       const index = ((i + offset) % max) + 1
       expect(
         await contractOwner.withContract.tokenURI(i)
       ).to.equal(`${this.base}${index}.json`)
     }
+  })
+
+  it('Should calc royalties', async function () {
+    const { contractOwner } = this.signers
+
+    const info = await contractOwner.withContract.royaltyInfo(1, 1000)
+    expect(info.receiver).to.equal(contractOwner.address)
+    expect(info.royaltyAmount).to.equal(100)
   })
 })

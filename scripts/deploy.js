@@ -4,13 +4,12 @@
 const hardhat = require('hardhat')
 
 //config
-const uri = 'https://gateway.pinata.cloud/ipfs/'
-const cid = 'QmWeGPZFsKiYLNMuuwJcWCzAfHXuMN53FtwY4Wbij8ZVHG'
+const uri = 'https://ipfs.io/ipfs/bafkreicxbxgvj5tmampxoc7rz7ebry5vbgrkgdvaansyaqtgdhskezwylq'
 
 async function main() {
   await hre.run('compile')
-  const NFT = await hardhat.ethers.getContractFactory('GratitideCollection')
-  const nft = await NFT.deploy(uri, cid)
+  const NFT = await hardhat.ethers.getContractFactory('GratitideGang')
+  const nft = await NFT.deploy(uri)
   await nft.deployed()
   console.log('NFT contract deployed to (update .env):', nft.address)
 }
