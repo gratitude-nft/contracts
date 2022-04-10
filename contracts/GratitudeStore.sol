@@ -2,12 +2,27 @@
 
 pragma solidity ^0.8.0;
 
+//   ____           _   _ _             _      
+//  / ___|_ __ __ _| |_(_) |_ _   _  __| | ___ 
+// | |  _| '__/ _` | __| | __| | | |/ _` |/ _ \
+// | |_| | | | (_| | |_| | |_| |_| | (_| |  __/
+//  \____|_|  \__,_|\__|_|\__|\__,_|\__,_|\___|
+//
+// A collection of 2,222 unique Non-Fungible Power SUNFLOWERS living in 
+// the metaverse. Becoming a GRATITUDE GANG NFT owner introduces you to 
+// a FAMILY of heart-centered, purpose-driven, service-oriented human 
+// beings.
+//
+// https://www.gratitudegang.io/
+//
+
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
@@ -165,6 +180,27 @@ contract GratitudeStore is
     uint256 price = mintPrice(id) * quantity;
     //if there is a price and the amount sent is less than
     if(price == 0 || msg.value < price) revert InvalidCall();
+    //we are okay to mint
+    _mintSupply(to, id, quantity);
+  }
+
+  /**
+   * @dev Allows anyone to redeem with a voucher (proof)
+   */
+  function redeem(
+    address to, 
+    uint256 id, 
+    uint256 quantity, 
+    bytes memory voucher
+  ) external nonReentrant {
+    //make sure the minter signed this off
+    if (!hasRole(MINTER_ROLE, ECDSA.recover(
+      ECDSA.toEthSignedMessageHash(
+        keccak256(abi.encodePacked("redeem", to, id, quantity))
+      ),
+      voucher
+    ))) revert InvalidCall();
+
     //we are okay to mint
     _mintSupply(to, id, quantity);
   }

@@ -2,7 +2,22 @@
 
 pragma solidity ^0.8.0;
 
+//   ____           _   _ _             _      
+//  / ___|_ __ __ _| |_(_) |_ _   _  __| | ___ 
+// | |  _| '__/ _` | __| | __| | | |/ _` |/ _ \
+// | |_| | | | (_| | |_| | |_| |_| | (_| |  __/
+//  \____|_|  \__,_|\__|_|\__|\__,_|\__,_|\___|
+//
+// A collection of 2,222 unique Non-Fungible Power SUNFLOWERS living in 
+// the metaverse. Becoming a GRATITUDE GANG NFT owner introduces you to 
+// a FAMILY of heart-centered, purpose-driven, service-oriented human 
+// beings.
+//
+// https://www.gratitudegang.io/
+//
+
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
@@ -27,7 +42,7 @@ interface IGratis is IERC20 {
  * @dev Stake sunflowers, get $GRATIS. $GRATIS can be used to purchase
  * items in the Gratitude Store
  */
-contract SunflowerStaking is Context, ReentrancyGuard {
+contract SunflowerStaking is Context, ReentrancyGuard, IERC721Receiver {
   //used in unstake()
   using Address for address;
 
@@ -42,9 +57,9 @@ contract SunflowerStaking is Context, ReentrancyGuard {
   // ============ Storage ============
 
   //mapping of owners to tokens
-  mapping(address => uint256[]) _stakers;
+  mapping(address => uint256[]) private _stakers;
   //start time of a token staked
-  mapping(uint256 => uint256) _start;
+  mapping(uint256 => uint256) private _start;
 
   // ============ Deploy ============
 
@@ -66,6 +81,13 @@ contract SunflowerStaking is Context, ReentrancyGuard {
   }
 
   /**
+   * @dev Returns true if token staked
+   */
+  function staked(uint256 tokenId) public view returns(bool) {
+    return _start[tokenId] > 0;
+  }
+
+  /**
    * @dev Calculate how many a tokens a staker earned
    */
   function totalReleaseable(address staker) 
@@ -78,6 +100,13 @@ contract SunflowerStaking is Context, ReentrancyGuard {
 
   // ============ Write Methods ============
 
+  // Deposit an asset and start an auction
+  function onERC721Received(address, address, uint256, bytes calldata)
+    external pure returns(bytes4)
+  {
+    return 0x150b7a02;
+  }
+
   /**
    * @dev Releases tokens without unstaking
    */
@@ -89,7 +118,7 @@ contract SunflowerStaking is Context, ReentrancyGuard {
     for (uint256 i = 0; i < _stakers[staker].length; i++) {
       toRelease += releaseable(_stakers[staker][i]);
       //reset when staking started
-    _start[_stakers[staker][i]] = block.timestamp;
+      _start[_stakers[staker][i]] = block.timestamp;
     }
 
     //next mint tokens

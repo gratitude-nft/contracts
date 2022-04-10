@@ -41,7 +41,6 @@ function getRole(name) {
     ethers.utils.solidityKeccak256(['string'], [name]).slice(2), 
     'hex'
   ).toString('hex')
-
 }
 
 describe('SunflowerStaking Tests', function () {
@@ -50,7 +49,7 @@ describe('SunflowerStaking Tests', function () {
     const nft = await deploy(
       'GratitudeGang', 
       'https://ipfs.io/ipfs/Qm123abc', 
-      'https://ipfs.io/ipfs/Qm123abc/'
+      'https://ipfs.io/ipfs/Qm123abc/preview.json'
     )
     const token = await deploy('Gratis', signers[0].address)
     const staking = await deploy(
@@ -61,24 +60,67 @@ describe('SunflowerStaking Tests', function () {
 
     await bindContract('withNFT', 'GratitudeGang', nft, signers)
     await bindContract('withToken', 'Gratis', token, signers)
-    await bindContract('withStaking', 'GratisDeals', staking, signers)
+    await bindContract('withStaking', 'SunflowerStaking', staking, signers)
 
-    const [
-      admin,
-      holder1
-    ] = signers
+    const [ admin, staker ] = signers
 
-    //allow deals to mint products on market
+    //allow staking to mint tokens
     await admin.withToken.grantRole(
       getRole('MINTER_ROLE'), 
       admin.withStaking.address
     )
 
-    this.signers = {
-      admin,
-      holder1
-    }
+    //transfer an NFT to staker
+    await admin.withNFT.transferFrom(admin.address, staker.address, 1)
+    await admin.withNFT.setBaseURI('https://ipfs.io/ipfs/Qm123abc/')
+    await admin.withNFT.withdraw()
+
+    this.now = Math.floor(Date.now() / 1000)
+    this.signers = { admin, staker }
   })
 
-  it('Should', async function() {})
+  it('Should stake NFT', async function() {
+    const { admin, staker } = this.signers
+    //approve to be handled by the staking contract
+    await staker.withNFT.approve(staker.withStaking.address, 1)
+    await staker.withStaking.stake(1)
+    expect(await admin.withStaking.staked(1)).to.equal(true)
+  })
+
+  it('Should fastforward 30 days later', async function() {
+    await ethers.provider.send('evm_mine');
+    await ethers.provider.send('evm_setNextBlockTimestamp', [this.now + (3600*24*30)]); 
+    await ethers.provider.send('evm_mine');
+  })
+
+  it('Should be releasable', async function() {
+    const { admin } = this.signers
+    expect(await admin.withStaking.releaseable(1)).to.be.above(
+      ethers.utils.parseEther('259.1')
+    )
+  })
+
+  it('Should release', async function() {
+    const { admin, staker } = this.signers
+    expect(await admin.withToken.balanceOf(staker.address)).to.equal(0)
+    await staker.withStaking.release()
+    expect(await admin.withToken.balanceOf(staker.address)).to.be.above(
+      ethers.utils.parseEther('259.1')
+    )
+  })
+
+  it('Should fastforward 30 days later', async function() {
+    await ethers.provider.send('evm_mine');
+    await ethers.provider.send('evm_setNextBlockTimestamp', [this.now + (3600*24*60)]); 
+    await ethers.provider.send('evm_mine');
+  })
+
+  it('Should unstake', async function() {
+    const { admin, staker } = this.signers
+    await staker.withStaking.unstake()
+    expect(await admin.withToken.balanceOf(staker.address)).to.be.above(
+      ethers.utils.parseEther('518.3')
+    )
+    expect(await admin.withNFT.ownerOf(1)).to.equal(staker.address)
+  })
 })
