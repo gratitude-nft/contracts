@@ -2,29 +2,34 @@
 
 pragma solidity ^0.8.0;
 
+//   ____           _   _ _             _      
+//  / ___|_ __ __ _| |_(_) |_ _   _  __| | ___ 
+// | |  _| '__/ _` | __| | __| | | |/ _` |/ _ \
+// | |_| | | | (_| | |_| | |_| |_| | (_| |  __/
+//  \____|_|  \__,_|\__|_|\__|\__,_|\__,_|\___|
+//
+// A collection of 2,222 unique Non-Fungible Power SUNFLOWERS living in 
+// the metaverse. Becoming a GRATITUDE GANG NFT owner introduces you to 
+// a FAMILY of heart-centered, purpose-driven, service-oriented human 
+// beings.
+//
+// https://www.gratitudegang.io/
+//
+
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-import "erc721b/contracts/extensions/ERC721BURIBase.sol";
-import "erc721b/contracts/extensions/ERC721BURIContract.sol";
-
-error NoBaseURI();
-error SaleStarted();
-error InvalidProof();
-error SaleNotStarted();
-error AlreadyRedeemed();
-error InvalidRecipient();
-error WhitelistNotStarted();
+import "erc721b/contracts/extensions/ERC721BBaseTokenURI.sol";
+import "erc721b/contracts/extensions/ERC721BContractURIStorage.sol";
 
 contract GratitudeGang is
   Ownable,
   ReentrancyGuard,
-  ERC721BURIBase,
-  ERC721BURIContract
+  ERC721BBaseTokenURI,
+  ERC721BContractURIStorage
 {
   using Strings for uint256;
   using SafeMath for uint256;
@@ -48,12 +53,11 @@ contract GratitudeGang is
   //the offset to be used to determine what token id should get which 
   //CID in some sort of random fashion. This is kind of immutable as 
   //it's only set in `widthdraw()`
-  uint16 public indexOffset;
-
+  uint16 public randomizer;
   //mapping of address to amount minted
   mapping(address => uint256) public minted;
   //mapping of token id to custom uri
-  mapping(uint256 => string) public customURI;
+  mapping(uint256 => string) public ambassadorURI;
   //mapping of ambassador address to whether if they redeemed already
   mapping(address => bool) public ambassadors;
 
@@ -63,23 +67,44 @@ contract GratitudeGang is
   bool public whitelistStarted;
   //flag for if the sales has started
   bool public saleStarted;
+  //a flag that allows NFTs to be listed on marketplaces
+  //this helps to prevent people from listing at a lower
+  //price during the whitelist
+  bool approvable = false;
+
+  // ============ Modifier ============
+
+  modifier canApprove {
+    if (!approvable) revert InvalidCall();
+    _;
+  }
 
   // ============ Deploy ============
 
   /**
-   * @dev Initializes ERC721B
+   * @dev Sets contract URI, preview URI, mints 30 to the owner for giveaways
    */
-  constructor(
-    string memory uri,
-    string memory preview
-  ) ERC721B("Gratitude Gang", "GRATITUDE") {
+  constructor(string memory uri, string memory preview) {
     _setContractURI(uri);
     previewURI = preview;
-    _safeMint(owner(), 1);
-
+    _safeMint(owner(), 30);
   }
 
   // ============ Read Methods ============
+
+  /**
+   * @dev See {IERC721Metadata-name}.
+   */
+  function name() external pure returns(string memory) {
+    return "Gratitude Gang";
+  }
+
+  /**
+   * @dev See {IERC721Metadata-symbol}.
+   */
+  function symbol() external pure returns(string memory) {
+    return "GRATITUDE";
+  }
 
   /** 
    * @dev ERC165 bytes to add to interface array - set in parent contract
@@ -107,17 +132,14 @@ contract GratitudeGang is
    * @dev See {IERC165-supportsInterface}.
    */
   function supportsInterface(bytes4 interfaceId)
-    public
-    view
-    virtual
-    override
-    returns(bool)
+    public view override returns(bool)
   {
-    //support ERC2981
-    if (interfaceId == _INTERFACE_ID_ERC2981) {
-      return true;
-    }
-    return super.supportsInterface(interfaceId);
+    //support ERC721
+    return interfaceId == type(IERC721Metadata).interfaceId
+      //support ERC2981
+      || interfaceId == _INTERFACE_ID_ERC2981
+      //support other things
+      || super.supportsInterface(interfaceId);
   }
 
   /**
@@ -125,18 +147,18 @@ contract GratitudeGang is
    * token URI
    */
   function tokenURI(uint256 tokenId) 
-    public view virtual override returns(string memory) 
+    public view override returns(string memory) 
   {
     if (!_exists(tokenId)) revert NonExistentToken();
 
     //if there is a custom URI
-    if (bytes(customURI[tokenId]).length > 0) {
+    if (bytes(ambassadorURI[tokenId]).length > 0) {
       //return that
-      return customURI[tokenId];
+      return ambassadorURI[tokenId];
     }
 
     //if no offset
-    if (indexOffset == 0) {
+    if (randomizer == 0) {
       //use the placeholder
       return previewURI;
     }
@@ -146,18 +168,11 @@ contract GratitudeGang is
     // - token 6 = ((6 + 2) % 8) + 1 = 1
     // - token 7 = ((7 + 2) % 8) + 1 = 2
     // - token 8 = ((8 + 2) % 8) + 1 = 3
-    uint256 index = tokenId.add(indexOffset).mod(MAX_SUPPLY).add(1);
+    uint256 index = tokenId.add(randomizer).mod(MAX_SUPPLY).add(1);
     //ex. https://ipfs.io/Qm123abc/ + 1000 + .json
     return string(
       abi.encodePacked(baseTokenURI(), index.toString(), ".json")
     );
-  }
-  
-  /**
-   * @dev Shows the overall amount of tokens generated in the contract
-   */
-  function totalSupply() public virtual view returns (uint256) {
-    return lastTokenId();
   }
 
   // ============ Write Methods ===========
@@ -165,16 +180,16 @@ contract GratitudeGang is
   /**
    * @dev Allows anyone to get a token that was approved by the owner
    */
-  function authorize(uint256 quantity, bytes memory proof) 
+  function authorize(bytes memory proof) 
     external payable 
   {
     address recipient = _msgSender();
     //make sure recipient is a valid address
-    if (recipient == address(0)) revert InvalidRecipient();
+    if (recipient == address(0)) revert InvalidCall();
     //has the whitelist sale started?
-    if (!whitelistStarted) revert WhitelistNotStarted();
+    if (!whitelistStarted) revert InvalidCall();
     //has the sale started?
-    if (saleStarted) revert SaleStarted();
+    if (saleStarted) revert InvalidCall();
 
     //make sure the minter signed this off
     if (ECDSA.recover(
@@ -182,20 +197,18 @@ contract GratitudeGang is
         keccak256(abi.encodePacked("authorized", recipient))
       ),
       proof
-    ) != owner()) revert InvalidProof();
+    ) != owner()) revert InvalidCall();
   
-    if (quantity == 0 
-      //the quantity here plus the current amount already minted 
-      //should be less than the max purchase amount
-      || quantity.add(minted[recipient]) > MAX_PURCHASE
-      //the value sent should be the price times quantity
-      || quantity.mul(WHITELIST_PRICE) > msg.value
+    //can only mint 1 during the whitelist
+    if (minted[recipient] > 0
+      //the value sent should be equal or more than the whitelist price
+      || WHITELIST_PRICE > msg.value
       //the quantity being minted should not exceed the max supply
-      || (lastTokenId() + quantity) > MAX_SUPPLY
-    ) revert InvalidAmount();
+      || (totalSupply() + 1) > MAX_SUPPLY
+    ) revert InvalidCall();
 
-    minted[recipient] += uint8(quantity);
-    _safeMint(recipient, quantity);
+    minted[recipient] = 1;
+    _safeMint(recipient, 1);
   }
 
   /**
@@ -206,9 +219,9 @@ contract GratitudeGang is
   function mint(uint256 quantity) external payable {
     address recipient = _msgSender();
     //make sure recipient is a valid address
-    if (recipient == address(0)) revert InvalidRecipient();
+    if (recipient == address(0)) revert InvalidCall();
     //has the sale started?
-    if(!saleStarted) revert SaleNotStarted();
+    if(!saleStarted) revert InvalidCall();
   
     if (quantity == 0 
       //the quantity here plus the current amount already minted 
@@ -217,8 +230,8 @@ contract GratitudeGang is
       //the value sent should be the price times quantity
       || quantity.mul(SALE_PRICE) > msg.value
       //the quantity being minted should not exceed the max supply
-      || (lastTokenId() + quantity) > MAX_SUPPLY
-    ) revert InvalidAmount();
+      || (totalSupply() + quantity) > MAX_SUPPLY
+    ) revert InvalidCall();
 
     minted[recipient] += uint8(quantity);
     _safeMint(recipient, quantity);
@@ -234,7 +247,7 @@ contract GratitudeGang is
     bytes memory proof
   ) external virtual {
     //check to see if they redeemed already
-    if(ambassadors[recipient] != false) revert AlreadyRedeemed();
+    if(ambassadors[recipient] != false) revert InvalidCall();
 
     //make sure the owner signed this off
     if (ECDSA.recover(
@@ -247,9 +260,9 @@ contract GratitudeGang is
         ))
       ),
       proof
-    ) != owner()) revert InvalidProof();
+    ) != owner()) revert InvalidCall();
 
-    uint256 nextTokenId = lastTokenId() + 1;
+    uint256 nextTokenId = totalSupply() + 1;
 
     //if ambassador
     if (ambassador) {
@@ -260,9 +273,29 @@ contract GratitudeGang is
     }
 
     //add custom uri, so we know what token to customize
-    customURI[nextTokenId] = uri;
+    ambassadorURI[nextTokenId] = uri;
     //flag that an ambassador/founder has redeemed
     ambassadors[recipient] = true;
+  }
+
+  // ============ Approval Methods ===========
+
+  /**
+   * @dev Check if can approve before approving
+   */
+  function approve(address to, uint256 tokenId) 
+    public virtual override canApprove 
+  {
+    super.approve(to, tokenId);
+  }
+
+  /**
+   * @dev Check if can approve before approving
+   */
+  function setApprovalForAll(address operator, bool approved) 
+    public virtual override canApprove
+  {
+    super.setApprovalForAll(operator, approved);
   }
 
   // ============ Owner Methods ===========
@@ -270,56 +303,48 @@ contract GratitudeGang is
   /**
    * @dev Sets the base URI for the active collection
    */
-  function setBaseURI(string memory uri) public virtual onlyOwner {
+  function setBaseURI(string memory uri) external onlyOwner {
     _setBaseURI(uri);
   }
 
   /**
    * @dev Sets the base URI for the active collection
    */
-  function startSale(bool start) public virtual onlyOwner {
+  function startSale(bool start) external onlyOwner {
     saleStarted = start;
   }
 
   /**
    * @dev Sets the base URI for the active collection
    */
-  function startWhitelist(bool start) public virtual onlyOwner {
+  function startWhitelist(bool start) external onlyOwner {
     whitelistStarted = start;
   }
 
   /**
    * @dev Allows the proceeds to be withdrawn. This also releases the  
-   * collection at the same time to discourage rug pulls 
+   * collection at the same time to discourage rug pulls. You can now
+   * list these NFTs for sale on marketplaces.
    */
-  function withdraw() external virtual onlyOwner nonReentrant {
+  function withdraw() external onlyOwner nonReentrant {
     //cannot withdraw without setting a base URI first
-    if (bytes(_baseURI()).length == 0) revert NoBaseURI();
+    if (bytes(baseTokenURI()).length == 0) revert InvalidCall();
 
-    //set the offset
-    if (indexOffset == 0) {
-      indexOffset = uint16(block.number - 1) % MAX_SUPPLY;
-      if (indexOffset == 0) {
-        indexOffset = 1;
+    //set the randomizer, it's only here we will 
+    //set this so it's kind of immutable (a one time deal)
+    if (randomizer == 0) {
+      randomizer = uint16(block.number - 1) % MAX_SUPPLY;
+      if (randomizer == 0) {
+        randomizer = 1;
       }
     }
 
+    //now make approvable, it's only here we will 
+    //set this so it's kind of immutable (a one time deal)
+    if (!approvable) {
+      approvable = true;
+    }
+
     payable(_msgSender()).transfer(address(this).balance);
-  }
-
-  // ============ Internal Methods ===========
-
-  /**
-   * @dev Describes linear override for `_baseURI` used in 
-   * both `ERC721B` and `ERC721BURIBase`
-   */
-  function _baseURI() 
-    internal 
-    view 
-    virtual 
-    override(ERC721B, ERC721BURIBase) 
-    returns (string memory) 
-  {
-    return super._baseURI();
   }
 }
