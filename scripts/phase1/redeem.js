@@ -1,5 +1,5 @@
 //to run this on testnet:
-// $ npx hardhat run scripts/redeem.js
+// $ npx hardhat run scripts/phase1/redeem.js
 
 const hardhat = require('hardhat')
 const ambassadors = require('../data/ambassadors.json')

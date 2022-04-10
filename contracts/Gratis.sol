@@ -41,6 +41,7 @@ contract Gratis is
   constructor(address admin) ERC20("Tokens of Gratitude", "GRATIS") {
     //set up roles for contract creator
     _setupRole(DEFAULT_ADMIN_ROLE, admin);
+    _setupRole(PAUSER_ROLE, admin);
   }
 
   /**

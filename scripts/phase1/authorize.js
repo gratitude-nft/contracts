@@ -1,5 +1,5 @@
 //to run this on testnet:
-// $ npx hardhat run scripts/authorize.js
+// $ npx hardhat run scripts/phase1/authorize.js
 
 const hardhat = require('hardhat')
 const whitelist = require('../data/whitelist.json')

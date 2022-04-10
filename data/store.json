@@ -1,0 +1,8 @@
+{
+  "name": "The Gratitude Store",
+  "description": "Tokens of Gratitude you can purchase with Ethers or $GRATIS",
+  "image": "https://ipfs.io/ipfs/bafkreiheissckrfl65d5xgzqi52qusb7nc3nd7d6d2t7ze3gfpauiwpb4m",
+  "external_link": "https://www.gratitudegang.io/",
+  "seller_fee_basis_points": 400,
+  "fee_recipient": "0xE918ECf5eb8457516c7535cC847613625827b5B8"
+}

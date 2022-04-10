@@ -61,6 +61,7 @@ contract GratitudeStore is
 
   bytes32 public constant FUNDER_ROLE = keccak256("FUNDER_ROLE");
   bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+  bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
   bytes32 public constant CURATOR_ROLE = keccak256("CURATOR_ROLE");
 
   // ============ Storage ============
@@ -82,6 +83,7 @@ contract GratitudeStore is
   ) ERC1155(token_uri) {
     _contractURI = contract_uri;
     _setupRole(DEFAULT_ADMIN_ROLE, admin);
+    _setupRole(PAUSER_ROLE, admin);
   }
 
   // ============ Read Methods ============
@@ -223,6 +225,20 @@ contract GratitudeStore is
     external onlyRole(MINTER_ROLE) 
   {
     _mintSupply(to, id, quantity);
+  }
+
+  /**
+   * @dev Pauses all token transfers.
+   */
+  function pause() public virtual onlyRole(PAUSER_ROLE) {
+    _pause();
+  }
+
+  /**
+   * @dev Unpauses all token transfers.
+   */
+  function unpause() public virtual onlyRole(PAUSER_ROLE) {
+    _unpause();
   }
 
   /**

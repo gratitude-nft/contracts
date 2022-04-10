@@ -32,24 +32,30 @@ module.exports = {
     },
     localhost: {
       url: "http://127.0.0.1:8545",
+      scanner: '',
+      opensea: '',
       accounts: [process.env.BLOCKCHAIN_LOCALHOST_PRIVATE_KEY],
-      contracts: [
-        process.env.BLOCKCHAIN_LOCALHOST_CONTRACT_ADDRESS
-      ]
+      contracts: {
+        gang: process.env.BLOCKCHAIN_LOCALHOST_CONTRACT_ADDRESS
+      }
     },
     testnet: {
       url: "https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+      scanner: 'https://rinkeby.etherscan.io',
+      opensea: 'https://testnets.opensea.io',
       accounts: [process.env.BLOCKCHAIN_TESTNET_PRIVATE_KEY],
-      contracts: [
-        process.env.BLOCKCHAIN_TESTNET_CONTRACT_ADDRESS
-      ]
+      contracts: {
+        gang: process.env.BLOCKCHAIN_TESTNET_CONTRACT_ADDRESS
+      }
     },
     mainnet: {
       url: "https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+      scanner: 'https://etherscan.io',
+      opensea: 'https://opensea.io',
       accounts: [process.env.BLOCKCHAIN_MAINNET_PRIVATE_KEY],
-      contracts: [
-        process.env.BLOCKCHAIN_MAINNET_CONTRACT_ADDRESS
-      ]
+      contracts: {
+        gang: process.env.BLOCKCHAIN_MAINNET_CONTRACT_ADDRESS
+      }
     },
   },
   solidity: {
