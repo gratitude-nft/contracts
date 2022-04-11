@@ -5,7 +5,7 @@ const hardhat = require('hardhat')
 
 //config
 const storeURI = 'https://ipfs.io/ipfs/QmNambeT82fyK1suh4SUes6yxAKmNPfsNEvhiGskcsvWJ9'
-const storeBase = 'https://www.gratitudegang.io/store/'
+const storeBase = 'https://www.gratitudegang.io/gifts/'
 
 async function deploy(name, ...params) {
   //deploy the contract
