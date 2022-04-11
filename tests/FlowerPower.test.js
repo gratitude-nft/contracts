@@ -79,7 +79,7 @@ describe('FlowerPower Tests', function () {
     this.signers = { admin, staker }
   })
 
-  it('Should get tokens of staker', async function() {
+  it('Should get tokens owned', async function() {
     const { admin, staker } = this.signers
     const tokens = await admin.withStaking.ownerTokens(staker.address)
     expect(tokens[0]).to.equal(1)
@@ -91,6 +91,8 @@ describe('FlowerPower Tests', function () {
     await staker.withNFT.approve(staker.withStaking.address, 1)
     await staker.withStaking.stake(1)
     expect(await admin.withStaking.staked(1)).to.equal(true)
+    const tokens = await admin.withStaking.tokensStaked(staker.address)
+    expect(tokens[0]).to.equal(1)
   })
 
   it('Should fastforward 30 days later', async function() {
@@ -128,5 +130,10 @@ describe('FlowerPower Tests', function () {
       ethers.utils.parseEther('518.3')
     )
     expect(await admin.withNFT.ownerOf(1)).to.equal(staker.address)
+    expect(await admin.withStaking.staked(1)).to.equal(false)
+    const staked = await admin.withStaking.tokensStaked(staker.address)
+    expect(staked.length).to.equal(0)
+    const owned = await admin.withStaking.ownerTokens(staker.address)
+    expect(owned[0]).to.equal(1)
   })
 })

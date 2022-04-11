@@ -4,8 +4,8 @@
 const hardhat = require('hardhat')
 
 //config
-const storeURI = 'https://ipfs.io/ipfs/QmNambeT82fyK1suh4SUes6yxAKmNPfsNEvhiGskcsvWJ9'
-const storeBase = 'https://www.gratitudegang.io/gifts/'
+const storeURI = 'https://ipfs.io/ipfs/QmXaTLUPQ3hDih7gfP1PftkjQyeDVXyMc4xEaLpp9kZy3P'
+const storeBase = 'https://www.gratitudegang.io/data/gifts/'
 
 async function deploy(name, ...params) {
   //deploy the contract
@@ -119,7 +119,7 @@ async function main() {
   console.log('   - For vouchers - `redeem(address, uint256, uint256, bytes)`')
   console.log(' - FlowerPower has no admin')
   console.log(' - TokenToGifts is ownable in order to `makeDeal(uint256 id, uint256 price)`')
-
+  console.log('')
 }
 
 // We recommend this pattern to be able to use async/await everywhere

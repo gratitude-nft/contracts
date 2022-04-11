@@ -90,6 +90,13 @@ contract FlowerPower is Context, ReentrancyGuard, IERC721Receiver {
   }
 
   /**
+   * @dev Returns all the tokens the `owner` has staked
+   */
+  function tokensStaked(address owner) external view returns(uint256[] memory) {
+    return _stakers[owner];
+  }
+
+  /**
    * @dev Calculate how many a tokens an NFT earned
    */
   function releaseable(uint256 tokenId) public view returns(uint256) {
@@ -119,7 +126,9 @@ contract FlowerPower is Context, ReentrancyGuard, IERC721Receiver {
 
   // ============ Write Methods ============
 
-  // Deposit an asset and start an auction
+  /**
+   * @dev allows to receive tokens
+   */
   function onERC721Received(address, address, uint256, bytes calldata)
     external pure returns(bytes4)
   {
@@ -139,14 +148,9 @@ contract FlowerPower is Context, ReentrancyGuard, IERC721Receiver {
       //reset when staking started
       _start[_stakers[staker][i]] = block.timestamp;
     }
-
     //next mint tokens
     address(GRATIS).functionCall(
-      abi.encodeWithSelector(
-        GRATIS.mint.selector, 
-        staker, 
-        toRelease
-      ), 
+      abi.encodeWithSelector(GRATIS.mint.selector, staker, toRelease), 
       "Low-level mint failed"
     );
   }
@@ -163,11 +167,7 @@ contract FlowerPower is Context, ReentrancyGuard, IERC721Receiver {
     //get the staker
     address staker = _msgSender();
     //transfer token to here
-    SUNFLOWER_COLLECTION.safeTransferFrom(
-      staker, 
-      address(this), 
-      tokenId
-    );
+    SUNFLOWER_COLLECTION.safeTransferFrom(staker, address(this), tokenId);
     //add staker so we know who to return this to
     _stakers[staker].push(tokenId);
     //remember when staking started
@@ -190,7 +190,12 @@ contract FlowerPower is Context, ReentrancyGuard, IERC721Receiver {
         staker, 
         _stakers[staker][i]
       );
+      //zero out the start date
+      _start[_stakers[staker][i]] = 0;
     }
+
+    //remove the staker
+    delete _stakers[staker];
 
     //next mint tokens
     address(GRATIS).functionCall(
