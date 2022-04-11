@@ -44,7 +44,7 @@ function getRole(name) {
 
 }
 
-describe('Gratis Tests', function () {
+describe('TokensOfGratitude Tests', function () {
   before(async function() {
     const signers = await ethers.getSigners()
     const [ 
@@ -53,7 +53,7 @@ describe('Gratis Tests', function () {
       holder2, 
       holder3, 
       holder4
-    ] = await getSigners('withToken', 'Gratis', signers[0].address)
+    ] = await getSigners('withToken', 'TokensOfGratitude', signers[0].address)
 
     //grant admin to all roles
     await admin.withToken.grantRole(

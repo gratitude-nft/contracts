@@ -31,15 +31,15 @@ async function main() {
   await hre.run('compile')
   //get network and admin
   const network = hardhat.config.networks[hardhat.config.defaultNetwork]
-  const admin = (new ethers.Wallet(network.accounts[0]))
+  const admin = new ethers.Wallet(network.accounts[0])
 
   //1. get the nft contract that was deployed
-  const nft = { address: network.contracts.gang }
+  const nft = { address: network.contracts.nft }
   //2. next deploy the $GRATIS token
-  const token = await deploy('Gratis', admin.address)
+  const token = await deploy('TokensOfGratitude', admin.address)
   console.log('')
   console.log('-----------------------------------')
-  console.log('$GRATIS deployed to:', token.address)
+  console.log('TokensOfGratitude deployed to:', token.address)
   console.log(
     'npx hardhat verify --show-stack-traces --network',
     hardhat.config.defaultNetwork,
@@ -48,10 +48,10 @@ async function main() {
   )
   
   //3. next deploy the store
-  const store = await deploy('GratitudeStore', storeURI, storeBase, admin.address)
+  const store = await deploy('GiftsOfGratitude', storeURI, storeBase, admin.address)
   console.log('')
   console.log('-----------------------------------')
-  console.log('Store deployed to:', store.address)
+  console.log('GiftsOfGratitude deployed to:', store.address)
   console.log(
     'npx hardhat verify --show-stack-traces --network',
     hardhat.config.defaultNetwork,
@@ -62,10 +62,10 @@ async function main() {
   )
   
   //4. next deploy the staking
-  const staking = await deploy('SunflowerStaking', nft.address, token.address)
+  const staking = await deploy('FlowerPower', nft.address, token.address)
   console.log('')
   console.log('-----------------------------------')
-  console.log('Staking deployed to:', staking.address)
+  console.log('FlowerPower deployed to:', staking.address)
   console.log(
     'npx hardhat verify --show-stack-traces --network',
     hardhat.config.defaultNetwork,
@@ -75,10 +75,10 @@ async function main() {
   )
   
   //5. next deploy the deals
-  const deals = await deploy('GratisDeals', token.address, store.address)
+  const deals = await deploy('TokenToGifts', token.address, store.address)
   console.log('')
   console.log('-----------------------------------')
-  console.log('Deals deployed to:', deals.address)
+  console.log('TokenToGifts deployed to:', deals.address)
   console.log(
     'npx hardhat verify --show-stack-traces --network',
     hardhat.config.defaultNetwork,
@@ -90,13 +90,13 @@ async function main() {
   console.log('')
   console.log('-----------------------------------')
   console.log('Next Steps:')
-  console.log(' 1. In $GRATIS contract, grant MINTER_ROLE to Staking')
+  console.log(' 1. In TokensOfGratitude contract, grant MINTER_ROLE to FlowerPower')
   console.log(`    - ${network.scanner}/address/${token.address}#writeContract`)
   console.log(`    - grantRole( ${getRole('MINTER_ROLE')}, ${staking.address} )`)
-  console.log(' 2. In Store contract, grant MINTER_ROLE to Deals')
+  console.log(' 2. In GiftsOfGratitude contract, grant MINTER_ROLE to TokenToGifts')
   console.log(`    - ${network.scanner}/address/${store.address}#writeContract`)
   console.log(`    - grantRole( ${getRole('MINTER_ROLE')}, ${deals.address} )`)
-  console.log(' 3. In Store contract, grant CURATOR_ROLE and FUNDER_ROLE to admin')
+  console.log(' 3. In GiftsOfGratitude contract, grant CURATOR_ROLE and FUNDER_ROLE to admin')
   console.log(`    - ${network.scanner}/address/${store.address}#writeContract`)
   console.log(`    - grantRole( ${getRole('FUNDER_ROLE')}, ${admin.address} )`)
   console.log(`    - grantRole( ${getRole('CURATOR_ROLE')}, ${admin.address} )`)
@@ -104,21 +104,21 @@ async function main() {
   console.log('')
   console.log('-----------------------------------')
   console.log('Notes:')
-  console.log(' - $GRATIS contract has the following roles:')
+  console.log(' - TokensOfGratitude contract has the following roles:')
   console.log(`   - MINTER_ROLE - ${getRole('MINTER_ROLE')}`)
   console.log(`   - PAUSER_ROLE - ${getRole('PAUSER_ROLE')}`)
-  console.log(' - There is no limit to $GRATIS, but $GRATIS right now can only be earned through staking')
-  console.log(' - Store contract has the following roles:')
+  console.log(' - There is no limit to TokensOfGratitude, but TokensOfGratitude right now can only be earned through FlowerPower')
+  console.log(' - GiftsOfGratitude contract has the following roles:')
   console.log(`   - MINTER_ROLE - ${getRole('MINTER_ROLE')}`)
   console.log(`   - PAUSER_ROLE - ${getRole('PAUSER_ROLE')}`)
   console.log(`   - FUNDER_ROLE - ${getRole('FUNDER_ROLE')}`)
   console.log(`   - CURATOR_ROLE - ${getRole('CURATOR_ROLE')}`)
-  console.log(' - Store has various ways to mint including')
+  console.log(' - GiftsOfGratitude has various ways to mint including')
   console.log('   - For admins - `mint(address, uint256, uint256)`')
   console.log('   - For buyers - `buy(address, uint256, uint256)`')
   console.log('   - For vouchers - `redeem(address, uint256, uint256, bytes)`')
-  console.log(' - Staking has no admin')
-  console.log(' - Deals is ownable in order to `makeDeal(uint256 id, uint256 price)`')
+  console.log(' - FlowerPower has no admin')
+  console.log(' - TokenToGifts is ownable in order to `makeDeal(uint256 id, uint256 price)`')
 
 }
 

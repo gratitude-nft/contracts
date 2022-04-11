@@ -36,25 +36,25 @@ function getRole(name) {
 
 }
 
-describe('GratisDeals Tests', function () {
+describe('TokenToGifts Tests', function () {
   before(async function() {
     const signers = await ethers.getSigners()
     const store = await deploy(
-      'GratitudeStore', 
+      'GiftsOfGratitude', 
       'https://ipfs.io/ipfs/Qm123abc', 
       'https://ipfs.io/ipfs/Qm123abc/',
       signers[0].address
     )
-    const token = await deploy('Gratis', signers[0].address)
+    const token = await deploy('TokensOfGratitude', signers[0].address)
     const deals = await deploy(
-      'GratisDeals',
+      'TokenToGifts',
       token.address, 
       store.address
     )
     
-    await bindContract('withStore', 'GratitudeStore', store, signers)
-    await bindContract('withToken', 'Gratis', token, signers)
-    await bindContract('withDeals', 'GratisDeals', deals, signers)
+    await bindContract('withStore', 'GiftsOfGratitude', store, signers)
+    await bindContract('withToken', 'TokensOfGratitude', token, signers)
+    await bindContract('withDeals', 'TokenToGifts', deals, signers)
 
     const [ admin, buyer ] = signers
 

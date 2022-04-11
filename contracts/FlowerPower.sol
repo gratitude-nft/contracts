@@ -36,13 +36,17 @@ interface IGratis is IERC20 {
   function mint(address to, uint256 amount) external;
 }
 
+interface IERC721B is IERC721 {
+  function totalSupply() external view returns(uint256);
+}
+
 // ============ Contract ============
 
 /**
  * @dev Stake sunflowers, get $GRATIS. $GRATIS can be used to purchase
  * items in the Gratitude Store
  */
-contract SunflowerStaking is Context, ReentrancyGuard, IERC721Receiver {
+contract FlowerPower is Context, ReentrancyGuard, IERC721Receiver {
   //used in unstake()
   using Address for address;
 
@@ -50,7 +54,7 @@ contract SunflowerStaking is Context, ReentrancyGuard, IERC721Receiver {
 
   //tokens earned per second
   uint256 public constant TOKEN_RATE = 0.0001 ether;
-  IERC721 public immutable SUNFLOWER_COLLECTION;
+  IERC721B public immutable SUNFLOWER_COLLECTION;
   //this is the contract address for $GRATIS
   IGratis public immutable GRATIS;
 
@@ -63,12 +67,27 @@ contract SunflowerStaking is Context, ReentrancyGuard, IERC721Receiver {
 
   // ============ Deploy ============
 
-  constructor(IERC721 collection, IGratis gratis) {
+  constructor(IERC721B collection, IGratis gratis) {
     SUNFLOWER_COLLECTION = collection;
     GRATIS = gratis;
   }
 
   // ============ Read Methods ============
+
+  /**
+   * @dev Returns all the tokens an owner owns
+   */
+  function ownerTokens(address owner) external view returns(uint256[] memory) {
+    uint256 balance = SUNFLOWER_COLLECTION.balanceOf(owner);
+    uint256 supply = SUNFLOWER_COLLECTION.totalSupply();
+    uint256[] memory tokens = new uint256[](balance);
+    for (uint256 i = 1; i <= supply; i++) {
+      if (SUNFLOWER_COLLECTION.ownerOf(i) == owner) {
+        tokens[tokens.length - 1] = i;
+      }
+    }
+    return tokens;
+  }
 
   /**
    * @dev Calculate how many a tokens an NFT earned

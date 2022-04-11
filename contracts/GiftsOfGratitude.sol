@@ -39,7 +39,7 @@ error InvalidCall();
 /**
  * @dev Gratitude store where members can buy other NFTs
  */
-contract GratitudeStore is 
+contract GiftsOfGratitude is 
   Ownable,
   ReentrancyGuard,
   ERC1155Burnable,
@@ -120,7 +120,7 @@ contract GratitudeStore is
    * @dev Returns the name
    */
   function name() external pure returns(string memory) {
-    return "Gratitude Market";
+    return "Gifts of Gratitude";
   }
 
   /**
@@ -136,7 +136,7 @@ contract GratitudeStore is
    * @dev Returns the symbol
    */
   function symbol() external pure returns(string memory) {
-    return "GRATIMARKET";
+    return "GOG";
   }
 
   /**

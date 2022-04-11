@@ -47,11 +47,11 @@ interface IERC1155Mintable is IERC1155 {
 /**
  * @dev Pricing for items in the Gratitude store in $GRATIS
  */
-contract GratisDeals is Ownable {
+contract TokenToGifts is Ownable {
 
   // ============ Constants ============
 
-  IERC1155Mintable public immutable STORE;
+  IERC1155Mintable public immutable GIFTS;
   IERC20Burnable public immutable GRATIS;
 
   // ============ Storage ============
@@ -64,9 +64,9 @@ contract GratisDeals is Ownable {
   /**
    * @dev sets the gratis and the market
    */
-  constructor(IERC20Burnable gratis, IERC1155Mintable store)  {
+  constructor(IERC20Burnable gratis, IERC1155Mintable gifts)  {
     GRATIS = gratis;
-    STORE = store;
+    GIFTS = gifts;
   }
 
   // ============ Read Methods ============
@@ -92,7 +92,7 @@ contract GratisDeals is Ownable {
       || GRATIS.allowance(to, address(this)) < price
     ) revert InvalidCall();
     //we are okay to mint
-    STORE.mint(to, tokenId, quantity);
+    GIFTS.mint(to, tokenId, quantity);
     //burn it. muhahaha
     GRATIS.burnFrom(to, price);
   }

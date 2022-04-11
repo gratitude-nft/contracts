@@ -25,7 +25,7 @@ import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
  * @dev Tokens of Gratitude, issued as rewards for staking sunflowers
  * used to purchase various things in the Gratitude store
  */
-contract Gratis is
+contract TokensOfGratitude is
   Pausable,
   AccessControlEnumerable, 
   ERC20Burnable

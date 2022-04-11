@@ -35,6 +35,16 @@ function getRole(name) {
   ).toString('hex')
 }
 
+function voucher(recipient, tokenId, quantity) {
+  return Buffer.from(
+    ethers.utils.solidityKeccak256(
+      ['string', 'address', 'uint256', 'uint256'],
+      ['redeem', recipient, tokenId, quantity]
+    ).slice(2),
+    'hex'
+  )
+}
+
 describe('GratitudeStore Tests', function () {
   before(async function() {
     const signers = await ethers.getSigners()
@@ -42,7 +52,7 @@ describe('GratitudeStore Tests', function () {
     this.baseURI = 'https://ipfs.io/ipfs/Qm123abc/'
 
     const store = await deploy(
-      'GratitudeStore', 
+      'GiftsOfGratitude', 
       this.contractURI, 
       this.baseURI,
       signers[0].address
@@ -54,7 +64,7 @@ describe('GratitudeStore Tests', function () {
       holder2
     ] = await bindContract(
       'withStore', 
-      'GratitudeStore', 
+      'GiftsOfGratitude', 
       store,
       signers
     )
@@ -179,6 +189,16 @@ describe('GratitudeStore Tests', function () {
       admin.withStore.buy(holder2.address, 4, 2)
     ).to.revertedWith('InvalidCall()')
 
+  })
+
+  it('Should redeem', async function () {
+    const { admin, holder2 } = this.signers
+
+    const message = voucher(holder2.address, 2, 2)
+    const signature = await admin.signMessage(message)
+
+    await admin.withStore.redeem(holder2.address, 2, 2, signature)
+    expect(await admin.withStore.balanceOf(holder2.address, 2)).to.equal(4)
   })
 
   it('Should withdraw', async function () {

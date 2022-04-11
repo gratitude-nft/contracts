@@ -43,7 +43,7 @@ function getRole(name) {
   ).toString('hex')
 }
 
-describe('SunflowerStaking Tests', function () {
+describe('FlowerPower Tests', function () {
   before(async function() {
     const signers = await ethers.getSigners()
     const nft = await deploy(
@@ -51,16 +51,16 @@ describe('SunflowerStaking Tests', function () {
       'https://ipfs.io/ipfs/Qm123abc', 
       'https://ipfs.io/ipfs/Qm123abc/preview.json'
     )
-    const token = await deploy('Gratis', signers[0].address)
+    const token = await deploy('TokensOfGratitude', signers[0].address)
     const staking = await deploy(
-      'SunflowerStaking',
+      'FlowerPower',
       nft.address,
       token.address
     )
 
     await bindContract('withNFT', 'GratitudeGang', nft, signers)
-    await bindContract('withToken', 'Gratis', token, signers)
-    await bindContract('withStaking', 'SunflowerStaking', staking, signers)
+    await bindContract('withToken', 'TokensOfGratitude', token, signers)
+    await bindContract('withStaking', 'FlowerPower', staking, signers)
 
     const [ admin, staker ] = signers
 
@@ -77,6 +77,12 @@ describe('SunflowerStaking Tests', function () {
 
     this.now = Math.floor(Date.now() / 1000)
     this.signers = { admin, staker }
+  })
+
+  it('Should get tokens of staker', async function() {
+    const { admin, staker } = this.signers
+    const tokens = await admin.withStaking.ownerTokens(staker.address)
+    expect(tokens[0]).to.equal(1)
   })
 
   it('Should stake NFT', async function() {

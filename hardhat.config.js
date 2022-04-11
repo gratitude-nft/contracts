@@ -36,7 +36,11 @@ module.exports = {
       opensea: '',
       accounts: [process.env.BLOCKCHAIN_LOCALHOST_PRIVATE_KEY],
       contracts: {
-        gang: process.env.BLOCKCHAIN_LOCALHOST_CONTRACT_ADDRESS
+        nft: process.env.BLOCKCHAIN_LOCALHOST_NFT_ADDRESS,
+        token: process.env.BLOCKCHAIN_LOCALHOST_NFT_ADDRESS,
+        store: process.env.BLOCKCHAIN_LOCALHOST_STORE_ADDRESS,
+        deals: process.env.BLOCKCHAIN_LOCALHOST_DEALS_ADDRESS,
+        staking: process.env.BLOCKCHAIN_LOCALHOST_STAKING_ADDRESS
       }
     },
     testnet: {
@@ -45,7 +49,11 @@ module.exports = {
       opensea: 'https://testnets.opensea.io',
       accounts: [process.env.BLOCKCHAIN_TESTNET_PRIVATE_KEY],
       contracts: {
-        gang: process.env.BLOCKCHAIN_TESTNET_CONTRACT_ADDRESS
+        nft: process.env.BLOCKCHAIN_TESTNET_NFT_ADDRESS,
+        token: process.env.BLOCKCHAIN_TESTNET_NFT_ADDRESS,
+        store: process.env.BLOCKCHAIN_TESTNET_STORE_ADDRESS,
+        deals: process.env.BLOCKCHAIN_TESTNET_DEALS_ADDRESS,
+        staking: process.env.BLOCKCHAIN_TESTNET_STAKING_ADDRESS
       }
     },
     mainnet: {
@@ -54,7 +62,11 @@ module.exports = {
       opensea: 'https://opensea.io',
       accounts: [process.env.BLOCKCHAIN_MAINNET_PRIVATE_KEY],
       contracts: {
-        gang: process.env.BLOCKCHAIN_MAINNET_CONTRACT_ADDRESS
+        nft: process.env.BLOCKCHAIN_MAINNET_NFT_ADDRESS,
+        token: process.env.BLOCKCHAIN_MAINNET_NFT_ADDRESS,
+        store: process.env.BLOCKCHAIN_MAINNET_STORE_ADDRESS,
+        deals: process.env.BLOCKCHAIN_MAINNET_DEALS_ADDRESS,
+        staking: process.env.BLOCKCHAIN_MAINNET_STAKING_ADDRESS
       }
     },
   },
