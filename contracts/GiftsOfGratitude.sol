@@ -21,7 +21,6 @@ import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 import "@openzeppelin/contracts/utils/Strings.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -33,6 +32,16 @@ import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 // ============ Errors ============
 
 error InvalidCall();
+
+// ============ Interfaces ============
+
+interface IERC20Burnable is IERC20 {
+  /**
+   * @dev Destroys `amount` tokens from `account`, deducting from the caller's
+   * allowance.
+   */
+  function burnFrom(address account, uint256 amount) external;
+}
 
 // ============ Contract ============
 
@@ -53,7 +62,8 @@ contract GiftsOfGratitude is
 
   struct Token {
     uint256 maxSupply;
-    uint256 mintPrice;
+    uint256 ethPrice;
+    uint256 gratisPrice;
     bool active;
   }
 
@@ -63,6 +73,8 @@ contract GiftsOfGratitude is
   bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
   bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
   bytes32 public constant CURATOR_ROLE = keccak256("CURATOR_ROLE");
+
+  IERC20Burnable public immutable GRATIS;
 
   // ============ Storage ============
 
@@ -79,11 +91,13 @@ contract GiftsOfGratitude is
   constructor(
     string memory contract_uri, 
     string memory token_uri,
+    IERC20Burnable gratis,
     address admin
   ) ERC1155(token_uri) {
     _contractURI = contract_uri;
     _setupRole(DEFAULT_ADMIN_ROLE, admin);
     _setupRole(PAUSER_ROLE, admin);
+    GRATIS = gratis;
   }
 
   // ============ Read Methods ============
@@ -112,8 +126,15 @@ contract GiftsOfGratitude is
   /**
    * @dev Get the mint supply for a token
    */
-  function mintPrice(uint256 id) public view returns(uint256) {
-    return _tokens[id].mintPrice;
+  function ethPrice(uint256 id) public view returns(uint256) {
+    return _tokens[id].ethPrice;
+  }
+
+  /**
+   * @dev Get the mint supply for a token
+   */
+  function gratisPrice(uint256 id) public view returns(uint256) {
+    return _tokens[id].gratisPrice;
   }
 
   /**
@@ -143,12 +164,12 @@ contract GiftsOfGratitude is
    * @dev Returns the max and price for a token
    */
   function tokenInfo(uint256 id) 
-    external view returns(uint256 max, uint256 price, uint256 remaining)
+    external view returns(uint256 max, uint256 price, uint256 supply)
   {
     return (
       _tokens[id].maxSupply, 
-      _tokens[id].mintPrice, 
-      remainingSupply(id)
+      _tokens[id].ethPrice, 
+      totalSupply(id)
     );
   }
 
@@ -173,15 +194,15 @@ contract GiftsOfGratitude is
   // ============ Write Methods ============
 
   /**
-   * @dev Allows anyone to mint by purchasing
+   * @dev Allows anyone to mint by purchasing with eth
    */
   function buy(address to, uint256 id, uint256 quantity) 
     external payable nonReentrant 
   {
     //get price
-    uint256 price = mintPrice(id) * quantity;
+    uint256 price = ethPrice(id) * quantity;
     //if there is a price and the amount sent is less than
-    if(price == 0 || msg.value < price) revert InvalidCall();
+    if (price == 0 || msg.value < price) revert InvalidCall();
     //we are okay to mint
     _mintSupply(to, id, quantity);
   }
@@ -207,15 +228,34 @@ contract GiftsOfGratitude is
     _mintSupply(to, id, quantity);
   }
 
+  /**
+   * @dev Allows anyone to mint by purchasing with eth
+   */
+  function support(address to, uint256 id, uint256 quantity) 
+    external payable nonReentrant 
+  {
+    //get price
+    uint256 price = gratisPrice(id) * quantity;
+    //if there is a price and the amount sent is less than
+    if( price == 0 
+      // or the amount allowed is less than
+      || GRATIS.allowance(to, address(this)) < price
+    ) revert InvalidCall();
+    //we are okay to mint
+    _mintSupply(to, id, quantity);
+    //burn it. muhahaha
+    GRATIS.burnFrom(to, price);
+  }
+
   // ============ Admin Methods ============
 
   /**
    * @dev Adds a token that can be minted
    */
-  function addToken(uint256 id, uint256 max, uint256 price) 
+  function addToken(uint256 id, uint256 max, uint256 eth, uint256 gratis) 
     external onlyRole(CURATOR_ROLE) 
   {
-    _tokens[id] = Token(max, price, true);
+    _tokens[id] = Token(max, eth, gratis, true);
   }
 
   /**

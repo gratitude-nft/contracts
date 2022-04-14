@@ -39,7 +39,6 @@ module.exports = {
         nft: process.env.BLOCKCHAIN_LOCALHOST_NFT_ADDRESS,
         token: process.env.BLOCKCHAIN_LOCALHOST_NFT_ADDRESS,
         store: process.env.BLOCKCHAIN_LOCALHOST_STORE_ADDRESS,
-        deals: process.env.BLOCKCHAIN_LOCALHOST_DEALS_ADDRESS,
         staking: process.env.BLOCKCHAIN_LOCALHOST_STAKING_ADDRESS
       }
     },
@@ -52,7 +51,6 @@ module.exports = {
         nft: process.env.BLOCKCHAIN_TESTNET_NFT_ADDRESS,
         token: process.env.BLOCKCHAIN_TESTNET_NFT_ADDRESS,
         store: process.env.BLOCKCHAIN_TESTNET_STORE_ADDRESS,
-        deals: process.env.BLOCKCHAIN_TESTNET_DEALS_ADDRESS,
         staking: process.env.BLOCKCHAIN_TESTNET_STAKING_ADDRESS
       }
     },
@@ -65,7 +63,6 @@ module.exports = {
         nft: process.env.BLOCKCHAIN_MAINNET_NFT_ADDRESS,
         token: process.env.BLOCKCHAIN_MAINNET_NFT_ADDRESS,
         store: process.env.BLOCKCHAIN_MAINNET_STORE_ADDRESS,
-        deals: process.env.BLOCKCHAIN_MAINNET_DEALS_ADDRESS,
         staking: process.env.BLOCKCHAIN_MAINNET_STAKING_ADDRESS
       }
     },

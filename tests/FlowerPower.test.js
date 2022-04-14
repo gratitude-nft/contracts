@@ -90,7 +90,7 @@ describe('FlowerPower Tests', function () {
     //approve to be handled by the staking contract
     await staker.withNFT.approve(staker.withStaking.address, 1)
     await staker.withStaking.stake(1)
-    expect(await admin.withStaking.staked(1)).to.equal(true)
+    expect(await admin.withStaking.stakedSince(1)).to.be.above(0)
     const tokens = await admin.withStaking.tokensStaked(staker.address)
     expect(tokens[0]).to.equal(1)
   })
@@ -130,7 +130,7 @@ describe('FlowerPower Tests', function () {
       ethers.utils.parseEther('518.3')
     )
     expect(await admin.withNFT.ownerOf(1)).to.equal(staker.address)
-    expect(await admin.withStaking.staked(1)).to.equal(false)
+    expect(await admin.withStaking.stakedSince(1)).to.equal(0)
     const staked = await admin.withStaking.tokensStaked(staker.address)
     expect(staked.length).to.equal(0)
     const owned = await admin.withStaking.ownerTokens(staker.address)

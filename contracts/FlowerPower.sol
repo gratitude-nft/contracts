@@ -78,12 +78,14 @@ contract FlowerPower is Context, ReentrancyGuard, IERC721Receiver {
    * @dev Returns all the tokens an owner owns
    */
   function ownerTokens(address owner) external view returns(uint256[] memory) {
-    uint256 balance = SUNFLOWER_COLLECTION.balanceOf(owner);
     uint256 supply = SUNFLOWER_COLLECTION.totalSupply();
-    uint256[] memory tokens = new uint256[](balance);
+    uint256[] memory tokens = new uint256[](
+      SUNFLOWER_COLLECTION.balanceOf(owner)
+    );
+    uint256 index;
     for (uint256 i = 1; i <= supply; i++) {
       if (SUNFLOWER_COLLECTION.ownerOf(i) == owner) {
-        tokens[tokens.length - 1] = i;
+        tokens[index++] = i;
       }
     }
     return tokens;
@@ -109,8 +111,8 @@ contract FlowerPower is Context, ReentrancyGuard, IERC721Receiver {
   /**
    * @dev Returns true if token staked
    */
-  function staked(uint256 tokenId) public view returns(bool) {
-    return _start[tokenId] > 0;
+  function stakedSince(uint256 tokenId) public view returns(uint256) {
+    return _start[tokenId];
   }
 
   /**

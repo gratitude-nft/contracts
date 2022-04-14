@@ -5,7 +5,7 @@ const hardhat = require('hardhat')
 
 //config
 const storeURI = 'https://ipfs.io/ipfs/QmXaTLUPQ3hDih7gfP1PftkjQyeDVXyMc4xEaLpp9kZy3P'
-const storeBase = 'https://www.gratitudegang.io/data/gifts/'
+const storeBase = 'https://www.gratitudegang.io/data/gifts'
 
 async function deploy(name, ...params) {
   //deploy the contract
@@ -48,7 +48,13 @@ async function main() {
   )
   
   //3. next deploy the store
-  const store = await deploy('GiftsOfGratitude', storeURI, storeBase, admin.address)
+  const store = await deploy(
+    'GiftsOfGratitude', 
+    storeURI, 
+    storeBase, 
+    token.address, 
+    admin.address
+  )
   console.log('')
   console.log('-----------------------------------')
   console.log('GiftsOfGratitude deployed to:', store.address)
@@ -58,6 +64,7 @@ async function main() {
     store.address,
     `"${storeURI}"`,
     `"${storeBase}"`,
+    `"${token.address}"`,
     `"${admin.address}"`
   )
   
@@ -73,19 +80,6 @@ async function main() {
     `"${nft.address}"`,
     `"${token.address}"`
   )
-  
-  //5. next deploy the deals
-  const deals = await deploy('TokenToGifts', token.address, store.address)
-  console.log('')
-  console.log('-----------------------------------')
-  console.log('TokenToGifts deployed to:', deals.address)
-  console.log(
-    'npx hardhat verify --show-stack-traces --network',
-    hardhat.config.defaultNetwork,
-    deals.address,
-    `"${token.address}"`,
-    `"${store.address}"`
-  )
 
   console.log('')
   console.log('-----------------------------------')
@@ -93,10 +87,7 @@ async function main() {
   console.log(' 1. In TokensOfGratitude contract, grant MINTER_ROLE to FlowerPower')
   console.log(`    - ${network.scanner}/address/${token.address}#writeContract`)
   console.log(`    - grantRole( ${getRole('MINTER_ROLE')}, ${staking.address} )`)
-  console.log(' 2. In GiftsOfGratitude contract, grant MINTER_ROLE to TokenToGifts')
-  console.log(`    - ${network.scanner}/address/${store.address}#writeContract`)
-  console.log(`    - grantRole( ${getRole('MINTER_ROLE')}, ${deals.address} )`)
-  console.log(' 3. In GiftsOfGratitude contract, grant CURATOR_ROLE and FUNDER_ROLE to admin')
+  console.log(' 2. In GiftsOfGratitude contract, grant CURATOR_ROLE and FUNDER_ROLE to admin')
   console.log(`    - ${network.scanner}/address/${store.address}#writeContract`)
   console.log(`    - grantRole( ${getRole('FUNDER_ROLE')}, ${admin.address} )`)
   console.log(`    - grantRole( ${getRole('CURATOR_ROLE')}, ${admin.address} )`)
@@ -118,7 +109,6 @@ async function main() {
   console.log('   - For buyers - `buy(address, uint256, uint256)`')
   console.log('   - For vouchers - `redeem(address, uint256, uint256, bytes)`')
   console.log(' - FlowerPower has no admin')
-  console.log(' - TokenToGifts is ownable in order to `makeDeal(uint256 id, uint256 price)`')
   console.log('')
 }
 
