@@ -65,12 +65,15 @@ describe('GiftsOfGratitude Tests', function () {
     
     const [ admin, holder1, holder2 ] = signers
 
+    //allow store to burn
+    await admin.withToken.grantRole(getRole('BURNER_ROLE'), store.address)
+    //allow admin to mint $GRATIS
+    await admin.withToken.grantRole(getRole('MINTER_ROLE'), admin.address)
+
     //allow admin to mint, curate and fund
     await admin.withStore.grantRole(getRole('FUNDER_ROLE'), admin.address)
     await admin.withStore.grantRole(getRole('MINTER_ROLE'), admin.address)
     await admin.withStore.grantRole(getRole('CURATOR_ROLE'), admin.address)
-    //allow admin to mint $GRATIS
-    await admin.withToken.grantRole(getRole('MINTER_ROLE'), admin.address)
 
     this.signers = { admin, holder1, holder2 }
   })
@@ -208,14 +211,9 @@ describe('GiftsOfGratitude Tests', function () {
 
   it('Should support', async function() {
     const { admin, holder1 } = this.signers
-    //1. add 20 $GRATIS to holder1
+    //add 20 $GRATIS to holder1
     await admin.withToken.mint(holder1.address, ethers.utils.parseEther('20'))
-    //2. approve deals of 8 $GRATIS
-    await holder1.withToken.approve(
-      holder1.withStore.address,
-      ethers.utils.parseEther('8')
-    )
-    //3. buy item from store
+    //buy item from store
     await admin.withStore.support(holder1.address, 1, 1)
     
     expect(await admin.withStore.balanceOf(holder1.address, 1)).to.equal(3)
@@ -223,26 +221,14 @@ describe('GiftsOfGratitude Tests', function () {
       ethers.utils.parseEther('12')
     )
     expect(await admin.withToken.balanceOf(admin.withStore.address)).to.equal(0)
-
-    //2. approve deals of 2 $GRATIS
-    await holder1.withToken.approve(
-      holder1.withStore.address,
-      ethers.utils.parseEther('2')
-    )
-    //3. buy item from store
+    //buy item from store
     await admin.withStore.support(holder1.address, 2, 1)
     expect(await admin.withStore.balanceOf(holder1.address, 2)).to.equal(3)
     expect(await admin.withToken.balanceOf(holder1.address)).to.equal(
       ethers.utils.parseEther('10')
     )
     expect(await admin.withToken.balanceOf(admin.withStore.address)).to.equal(0)
-
-    //2. approve deals of 10 $GRATIS
-    await holder1.withToken.approve(
-      holder1.withStore.address,
-      ethers.utils.parseEther('10')
-    )
-    //3. buy item from store
+    //buy item from store
     await admin.withStore.support(holder1.address, 4, 10)
     expect(await admin.withStore.balanceOf(holder1.address, 4)).to.equal(12)
     expect(await admin.withToken.balanceOf(holder1.address)).to.equal(0)
@@ -256,12 +242,7 @@ describe('GiftsOfGratitude Tests', function () {
     await expect( //no allowance
       admin.withStore.buy(holder1.address, 4, 2)
     ).to.be.revertedWith('InvalidCall()')
-
-    //approve deals of 24 $GRATIS
-    await holder1.withToken.approve(
-      holder1.withStore.address,
-      ethers.utils.parseEther('32')
-    )
+    
     await expect( //max quantity
       admin.withStore.buy(holder1.address, 1, 4)
     ).to.be.revertedWith('InvalidCall()')

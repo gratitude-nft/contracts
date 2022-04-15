@@ -17,7 +17,7 @@ pragma solidity ^0.8.0;
 //
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 import "@openzeppelin/contracts/utils/Strings.sol";
@@ -54,7 +54,7 @@ contract GiftsOfGratitude is
   ERC1155Burnable,
   ERC1155Pausable,
   ERC1155Supply,
-  AccessControlEnumerable
+  AccessControl
 {
   using Strings for uint256;
 
@@ -164,11 +164,12 @@ contract GiftsOfGratitude is
    * @dev Returns the max and price for a token
    */
   function tokenInfo(uint256 id) 
-    external view returns(uint256 max, uint256 price, uint256 supply)
+    external view returns(uint256 max, uint256 eth, uint256 gratis, uint256 supply)
   {
     return (
       _tokens[id].maxSupply, 
       _tokens[id].ethPrice, 
+      _tokens[id].gratisPrice, 
       totalSupply(id)
     );
   }
@@ -237,14 +238,11 @@ contract GiftsOfGratitude is
     //get price
     uint256 price = gratisPrice(id) * quantity;
     //if there is a price and the amount sent is less than
-    if( price == 0 
-      // or the amount allowed is less than
-      || GRATIS.allowance(to, address(this)) < price
-    ) revert InvalidCall();
-    //we are okay to mint
-    _mintSupply(to, id, quantity);
+    if( price == 0) revert InvalidCall();
     //burn it. muhahaha
     GRATIS.burnFrom(to, price);
+    //we are okay to mint
+    _mintSupply(to, id, quantity);
   }
 
   // ============ Admin Methods ============
@@ -335,7 +333,7 @@ contract GiftsOfGratitude is
     public 
     view 
     virtual 
-    override(AccessControlEnumerable, ERC1155) 
+    override(AccessControl, ERC1155) 
     returns(bool) 
   {
     return super.supportsInterface(interfaceId);

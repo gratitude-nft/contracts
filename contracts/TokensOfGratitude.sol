@@ -2,10 +2,10 @@
 
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 import "@openzeppelin/contracts/security/Pausable.sol";
-import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
 //   ____           _   _ _             _      
 //  / ___|_ __ __ _| |_(_) |_ _   _  __| | ___ 
@@ -25,14 +25,11 @@ import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
  * @dev Tokens of Gratitude, issued as rewards for staking sunflowers
  * used to purchase various things in the Gratitude store
  */
-contract TokensOfGratitude is
-  Pausable,
-  AccessControlEnumerable, 
-  ERC20Burnable
-{
+contract TokensOfGratitude is Pausable, AccessControl, ERC20 {
   //all custom roles
   bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
   bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+  bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
 
   /**
    * @dev Sets the name and symbol. Grants `DEFAULT_ADMIN_ROLE`
@@ -42,6 +39,39 @@ contract TokensOfGratitude is
     //set up roles for contract creator
     _setupRole(DEFAULT_ADMIN_ROLE, admin);
     _setupRole(PAUSER_ROLE, admin);
+  }
+
+  /**
+   * @dev Destroys `amount` tokens from the caller.
+   *
+   * See {ERC20-_burn}.
+   */
+  function burn(uint256 amount) public virtual {
+    _burn(_msgSender(), amount);
+  }
+
+  /**
+   * @dev Destroys `amount` tokens from `account`, deducting from the caller's
+   * allowance.
+   *
+   * See {ERC20-_burn} and {ERC20-allowance}.
+   *
+   * Requirements:
+   *
+   * - the caller must have allowance for ``accounts``'s tokens of at least
+   * `amount`.
+   */
+  function burnFrom(address account, uint256 amount) public virtual {
+    address operator = _msgSender();
+    if (!hasRole(BURNER_ROLE, operator)) {
+      uint256 currentAllowance = allowance(account, operator);
+      require(currentAllowance >= amount, "ERC20: burn amount exceeds allowance");
+      unchecked {
+        _approve(account, operator, currentAllowance - amount);
+      }
+    }
+
+    _burn(account, amount);
   }
 
   /**
