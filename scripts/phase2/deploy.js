@@ -55,6 +55,7 @@ async function main() {
     token.address, 
     admin.address
   )
+
   console.log('')
   console.log('-----------------------------------')
   console.log('GiftsOfGratitude deployed to:', store.address)

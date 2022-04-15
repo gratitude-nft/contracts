@@ -78,6 +78,8 @@ contract GiftsOfGratitude is
 
   // ============ Storage ============
 
+  //a count of total items
+  uint256 public totalTokens;
   //mapping of token id to token info (max, price)
   mapping(uint256 => Token) private _tokens;
   //the contract metadata
@@ -254,6 +256,7 @@ contract GiftsOfGratitude is
     external onlyRole(CURATOR_ROLE) 
   {
     _tokens[id] = Token(max, eth, gratis, true);
+    totalTokens++;
   }
 
   /**
