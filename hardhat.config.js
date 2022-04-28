@@ -39,7 +39,8 @@ module.exports = {
         nft: process.env.BLOCKCHAIN_LOCALHOST_NFT_ADDRESS,
         token: process.env.BLOCKCHAIN_LOCALHOST_NFT_ADDRESS,
         store: process.env.BLOCKCHAIN_LOCALHOST_STORE_ADDRESS,
-        staking: process.env.BLOCKCHAIN_LOCALHOST_STAKING_ADDRESS
+        staking: process.env.BLOCKCHAIN_LOCALHOST_STAKING_ADDRESS,
+        softing: process.env.BLOCKCHAIN_LOCALHOST_SOFTING_ADDRESS
       }
     },
     testnet: {
@@ -49,9 +50,10 @@ module.exports = {
       accounts: [process.env.BLOCKCHAIN_TESTNET_PRIVATE_KEY],
       contracts: {
         nft: process.env.BLOCKCHAIN_TESTNET_NFT_ADDRESS,
-        token: process.env.BLOCKCHAIN_TESTNET_NFT_ADDRESS,
+        token: process.env.BLOCKCHAIN_TESTNET_TOKEN_ADDRESS,
         store: process.env.BLOCKCHAIN_TESTNET_STORE_ADDRESS,
-        staking: process.env.BLOCKCHAIN_TESTNET_STAKING_ADDRESS
+        staking: process.env.BLOCKCHAIN_TESTNET_STAKING_ADDRESS,
+        softing: process.env.BLOCKCHAIN_TESTNET_SOFTING_ADDRESS
       }
     },
     mainnet: {
@@ -61,9 +63,10 @@ module.exports = {
       accounts: [process.env.BLOCKCHAIN_MAINNET_PRIVATE_KEY],
       contracts: {
         nft: process.env.BLOCKCHAIN_MAINNET_NFT_ADDRESS,
-        token: process.env.BLOCKCHAIN_MAINNET_NFT_ADDRESS,
+        token: process.env.BLOCKCHAIN_MAINNET_TOKEN_ADDRESS,
         store: process.env.BLOCKCHAIN_MAINNET_STORE_ADDRESS,
-        staking: process.env.BLOCKCHAIN_MAINNET_STAKING_ADDRESS
+        staking: process.env.BLOCKCHAIN_MAINNET_STAKING_ADDRESS,
+        softing: process.env.BLOCKCHAIN_MAINNET_SOFTING_ADDRESS
       }
     },
   },

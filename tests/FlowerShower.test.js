@@ -35,7 +35,7 @@ function getRole(name) {
   ).toString('hex')
 }
 
-describe('FlowerPower Tests', function () {
+describe('FlowerShower Tests', function () {
   before(async function() {
     const signers = await ethers.getSigners()
     const nft = await deploy(
@@ -45,14 +45,14 @@ describe('FlowerPower Tests', function () {
     )
     const token = await deploy('TokensOfGratitude', signers[0].address)
     const staking = await deploy(
-      'FlowerPower',
+      'FlowerShower',
       nft.address,
       token.address
     )
 
     await bindContract('withNFT', 'GratitudeGang', nft, signers)
     await bindContract('withToken', 'TokensOfGratitude', token, signers)
-    await bindContract('withStaking', 'FlowerPower', staking, signers)
+    await bindContract('withStaking', 'FlowerShower', staking, signers)
 
     const [ admin, staker ] = signers
 
@@ -67,44 +67,47 @@ describe('FlowerPower Tests', function () {
     await admin.withNFT.setBaseURI('https://ipfs.io/ipfs/Qm123abc/')
     await admin.withNFT.withdraw()
 
+    this.now = Math.floor(Date.now() / 1000)
     this.signers = { admin, staker }
   })
 
   it('Should get tokens owned', async function() {
     const { admin, staker } = this.signers
     const tokens = await admin.withStaking.ownerTokens(staker.address)
-    expect(tokens[0]).to.equal(1)
+    expect(tokens.unstaked[0]).to.equal(1)
+    expect(tokens.staked.length).to.equal(0)
   })
 
   it('Should stake NFT', async function() {
     const { admin, staker } = this.signers
-    //approve to be handled by the staking contract
-    await staker.withNFT.approve(staker.withStaking.address, 1)
-    await staker.withStaking.stake(1)
+    await staker.withStaking.stake([1])
     expect(await admin.withStaking.stakedSince(1)).to.be.above(0)
-    const tokens = await admin.withStaking.tokensStaked(staker.address)
-    expect(tokens[0]).to.equal(1)
+    const tokens = await admin.withStaking.ownerTokens(staker.address)
+    expect(tokens.staked[0]).to.equal(1)
+    expect(tokens.unstaked.length).to.equal(0)
   })
 
   it('Should fastforward 30 days later', async function() {
     await ethers.provider.send('evm_mine');
-    await ethers.provider.send('evm_increaseTime', [(3600 * 24 * 30)]); 
+    await ethers.provider.send('evm_increaseTime', [3600 * 24 * 30]); 
     await ethers.provider.send('evm_mine');
   })
 
   it('Should be releasable', async function() {
     const { admin } = this.signers
+    const rate = await admin.withStaking.TOKEN_RATE()
     expect(await admin.withStaking.releaseable(1)).to.be.above(
-      ethers.utils.parseEther('259.1')
+      String(rate * 3600 * 24 * 30)
     )
   })
 
   it('Should release', async function() {
     const { admin, staker } = this.signers
+    const rate = await admin.withStaking.TOKEN_RATE()
     expect(await admin.withToken.balanceOf(staker.address)).to.equal(0)
-    await staker.withStaking.release()
+    await staker.withStaking.release([1])
     expect(await admin.withToken.balanceOf(staker.address)).to.be.above(
-      ethers.utils.parseEther('259.1')
+      String(rate * 3600 * 24 * 30)
     )
   })
 
@@ -116,15 +119,16 @@ describe('FlowerPower Tests', function () {
 
   it('Should unstake', async function() {
     const { admin, staker } = this.signers
-    await staker.withStaking.unstake()
+    const rate = await admin.withStaking.TOKEN_RATE()
+    await staker.withStaking.unstake([1])
     expect(await admin.withToken.balanceOf(staker.address)).to.be.above(
-      ethers.utils.parseEther('518.3')
+      String(rate * 3600 * 24 * 60)
     )
     expect(await admin.withNFT.ownerOf(1)).to.equal(staker.address)
     expect(await admin.withStaking.stakedSince(1)).to.equal(0)
-    const staked = await admin.withStaking.tokensStaked(staker.address)
-    expect(staked.length).to.equal(0)
-    const owned = await admin.withStaking.ownerTokens(staker.address)
-    expect(owned[0]).to.equal(1)
+    
+    const tokens = await admin.withStaking.ownerTokens(staker.address)
+    expect(tokens.unstaked[0]).to.equal(1)
+    expect(tokens.staked.length).to.equal(0)
   })
 })
