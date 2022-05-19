@@ -7,10 +7,10 @@ const holders = {}
 async function main() {
   const NFT = await hardhat.ethers.getContractFactory('GratitudeGang')
   const nft = await NFT.attach(
-    hardhat.config.networks[hardhat.config.defaultNetwork].contracts[0]
+    hardhat.config.networks[hardhat.config.defaultNetwork].contracts.nft
   )
   const supply = parseInt(await nft.totalSupply())
-  for (let i = 235; i < supply; i++) {
+  for (let i = 0; i < supply; i++) {
     const address = await nft.ownerOf(i + 1)
     holders[address] = true
     console.log('owner of', i + 1, address)

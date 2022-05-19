@@ -30,43 +30,58 @@ module.exports = {
         interval: 5000
       }
     },
-    localhost: {
-      url: "http://127.0.0.1:8545",
-      scanner: '',
-      opensea: '',
-      accounts: [process.env.BLOCKCHAIN_LOCALHOST_PRIVATE_KEY],
-      contracts: {
-        nft: process.env.BLOCKCHAIN_LOCALHOST_NFT_ADDRESS,
-        token: process.env.BLOCKCHAIN_LOCALHOST_NFT_ADDRESS,
-        store: process.env.BLOCKCHAIN_LOCALHOST_STORE_ADDRESS,
-        staking: process.env.BLOCKCHAIN_LOCALHOST_STAKING_ADDRESS,
-        softing: process.env.BLOCKCHAIN_LOCALHOST_SOFTING_ADDRESS
-      }
-    },
-    testnet: {
+    rinkeby: {
       url: "https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+      chainId: 4,
       scanner: 'https://rinkeby.etherscan.io',
       opensea: 'https://testnets.opensea.io',
-      accounts: [process.env.BLOCKCHAIN_TESTNET_PRIVATE_KEY],
+      signer: process.env.BLOCKCHAIN_RINKEBY_BRIDGE_SIGNER,
+      accounts: [process.env.BLOCKCHAIN_RINKEBY_PRIVATE_KEY],
       contracts: {
-        nft: process.env.BLOCKCHAIN_TESTNET_NFT_ADDRESS,
-        token: process.env.BLOCKCHAIN_TESTNET_TOKEN_ADDRESS,
-        store: process.env.BLOCKCHAIN_TESTNET_STORE_ADDRESS,
-        staking: process.env.BLOCKCHAIN_TESTNET_STAKING_ADDRESS,
-        softing: process.env.BLOCKCHAIN_TESTNET_SOFTING_ADDRESS
+        nft: process.env.BLOCKCHAIN_RINKEBY_NFT_ADDRESS,
+        token: process.env.BLOCKCHAIN_RINKEBY_TOKEN_ADDRESS,
+        store: process.env.BLOCKCHAIN_RINKEBY_STORE_ADDRESS,
+        staking: process.env.BLOCKCHAIN_RINKEBY_STAKING_ADDRESS,
+        softing: process.env.BLOCKCHAIN_RINKEBY_SOFTING_ADDRESS,
+        bridge: process.env.BLOCKCHAIN_RINKEBY_BRIDGE_ADDRESS
       }
     },
-    mainnet: {
+    ethereum: {
       url: "https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+      chainId: 1,
       scanner: 'https://etherscan.io',
       opensea: 'https://opensea.io',
-      accounts: [process.env.BLOCKCHAIN_MAINNET_PRIVATE_KEY],
+      signer: process.env.BLOCKCHAIN_ETHEREUM_BRIDGE_SIGNER,
+      accounts: [process.env.BLOCKCHAIN_ETHEREUM_PRIVATE_KEY],
       contracts: {
-        nft: process.env.BLOCKCHAIN_MAINNET_NFT_ADDRESS,
-        token: process.env.BLOCKCHAIN_MAINNET_TOKEN_ADDRESS,
-        store: process.env.BLOCKCHAIN_MAINNET_STORE_ADDRESS,
-        staking: process.env.BLOCKCHAIN_MAINNET_STAKING_ADDRESS,
-        softing: process.env.BLOCKCHAIN_MAINNET_SOFTING_ADDRESS
+        nft: process.env.BLOCKCHAIN_ETHEREUM_NFT_ADDRESS,
+        token: process.env.BLOCKCHAIN_ETHEREUM_TOKEN_ADDRESS,
+        store: process.env.BLOCKCHAIN_ETHEREUM_STORE_ADDRESS,
+        staking: process.env.BLOCKCHAIN_ETHEREUM_STAKING_ADDRESS,
+        softing: process.env.BLOCKCHAIN_ETHEREUM_SOFTING_ADDRESS,
+        bridge: process.env.BLOCKCHAIN_ETHEREUM_BRIDGE_ADDRESS
+      }
+    },
+    mumbai: {
+      url: "https://matic-mumbai.chainstacklabs.com",
+      chainId: 80001,
+      scanner: 'https://mumbai.polygonscan.com',
+      opensea: 'https://opensea.io',
+      signer: process.env.BLOCKCHAIN_MUMBAI_BRIDGE_SIGNER,
+      accounts: [process.env.BLOCKCHAIN_MUMBAI_PRIVATE_KEY],
+      contracts: {
+        bridge: process.env.BLOCKCHAIN_MUMBAI_BRIDGE_ADDRESS
+      }
+    },
+    polygon: {
+      url: "https://polygon-rpc.com",
+      chainId: 137,
+      scanner: 'https://polygonscan.com',
+      opensea: 'https://opensea.io',
+      signer: process.env.BLOCKCHAIN_POLYGON_BRIDGE_SIGNER, 
+      accounts: [process.env.BLOCKCHAIN_POLYGON_PRIVATE_KEY],
+      contracts: {
+        bridge: process.env.BLOCKCHAIN_POLYGON_BRIDGE_ADDRESS
       }
     },
   },
