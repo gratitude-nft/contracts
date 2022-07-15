@@ -2,7 +2,7 @@
 // $ npx hardhat run scripts/phase3/redeem.js
 
 const hardhat = require('hardhat')
-const holders = require('../../data/holders.json')
+const holders = require('../../data/redeemers.json')
 
 function hashToken(recipient, ambassador) {
   return Buffer.from(

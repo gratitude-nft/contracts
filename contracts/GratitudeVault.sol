@@ -126,7 +126,7 @@ contract GratitudeVault is Context, AccessControl, ReentrancyGuard {
   /**
    * @dev Allows anyone to redeem an NFT from this vault with GRATIS
    */
-  function support(address recipient, uint256 nftId) external {
+  function support(address recipient, uint256 nftId) external nonReentrant {
     //burn it. muhahaha
     GRATIS.burnFrom(_msgSender(), nfts[nftId].tokenPrice);
     //transfer out
